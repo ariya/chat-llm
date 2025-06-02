@@ -17,7 +17,7 @@ jobs:
         uses: ./.github/actions/prepare-llm
         timeout-minutes: 3
 
-      - run: echo 'Which planet in our solar system is the largest?' | ./query-llm.js | tee output.txt
+      - run: echo 'Which planet in our solar system is the largest?' | ./chat-llm.js | tee output.txt
         timeout-minutes: 7
         env:
           LLM_API_BASE_URL: 'http://127.0.0.1:8080/v1'
