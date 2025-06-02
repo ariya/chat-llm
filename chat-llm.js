@@ -141,8 +141,7 @@ Answer in plain text and not in Markdown format.`;
 
 const reply = async (context) => {
     const { inquiry, history, delegates } = context;
-    const { enter, leave, stream } = delegates;
-    enter && enter('Reply');
+    const { stream } = delegates || {};
 
     const messages = [];
     messages.push({ role: 'system', content: REPLY_PROMPT });
@@ -156,18 +155,8 @@ const reply = async (context) => {
     messages.push({ role: 'user', content: inquiry });
     const answer = await chat(messages, stream);
 
-    leave && leave('Reply', { inquiry, answer });
     return { answer, ...context };
 }
-
-/**
- * Represents the record of an atomic processing.
- *
- * @typedef {Object} Stage
- * @property {string} name
- * @property {number} timestamp (Unix epoch)
- * @property {number} duration (in ms)
- */
 
 /**
  * Represents the contextual information for each pipeline stage.
@@ -190,16 +179,13 @@ const interact = async () => {
     const qa = () => {
         io.question(`${YELLOW}>> ${CYAN}`, async (inquiry) => {
             process.stdout.write(NORMAL);
-            const stages = [];
-            const enter = (name) => { stages.push({ name, timestamp: Date.now() }) };
-            const leave = (name, fields) => { stages.push({ name, timestamp: Date.now(), ...fields }) };
-            const delegates = { stream, enter, leave };
+            const delegates = { stream };
             const context = { inquiry, history, delegates };
             const start = Date.now();
             const result = await reply(context);
             const duration = Date.now() - start;
             const { answer } = result;
-            history.push({ inquiry, answer, duration, stages });
+            history.push({ inquiry, answer, duration });
             console.log();
             console.log();
             loop && qa();
