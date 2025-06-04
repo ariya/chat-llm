@@ -1,0 +1,67 @@
+name: Test with small LLM
+
+on: [workflow_dispatch, push, pull_request]
+
+jobs:
+
+  interactive-test:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Prepare LLM
+        uses: ./.github/actions/prepare-llm
+        timeout-minutes: 3
+
+      - run: echo 'Which planet in our solar system is the largest?' | ./chat-llm.js | tee output.txt
+        timeout-minutes: 7
+        env:
+          LLM_API_BASE_URL: 'http://127.0.0.1:8080/v1'
+          LLM_DEBUG: 1
+
+      - run: cat output.txt
+      - run: grep -i jupiter output.txt
+
+
+  canary-single-turn:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Prepare LLM
+        uses: ./.github/actions/prepare-llm
+        timeout-minutes: 3
+
+      - run: ./chat-llm.js tests/canary-single-turn.txt
+        env:
+          LLM_API_BASE_URL: 'http://127.0.0.1:8080/v1'
+
+  canary-multi-turn:
+    runs-on: ubuntu-22.04
+    needs: canary-single-turn
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Prepare LLM
+        uses: ./.github/actions/prepare-llm
+        timeout-minutes: 3
+
+      - run: ./chat-llm.js tests/canary-multi-turn.txt
+        env:
+          LLM_API_BASE_URL: 'http://127.0.0.1:8080/v1'
+
