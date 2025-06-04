@@ -184,16 +184,9 @@ const chat = async (messages, handler = null, attempt = MAX_RETRY_ATTEMPT) => {
 }
 
 
-/**
- * Replies to the user. This is zero-shot style.
- *
- * @param {Context} context - Current pipeline context.
- * @returns {Context} Updated pipeline context.
- */
-
-const REPLY_PROMPT = `You are a helpful answering assistant.
-Your task is to reply and respond to the user politely and concisely.
-Answer in plain text and not in Markdown format.`;
+const REPLY_PROMPT = `You are a helpful AI assistant. You are chatting with a human user.
+Most of the time your lines should be a sentence or two, unless the user's request requires reasoning or long-form outputs.
+Never use emojis, unless explicitly asked to. Never use markdown, always answer in plain text.`;
 
 const reply = async (context) => {
     const { inquiry, history, delegates } = context;
