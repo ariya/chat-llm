@@ -1,0 +1,135 @@
+Story: Science
+
+User: Name 2 scientists who developed modern calculus
+Assistant: /Newton/ and /Leibniz/ are credited with the development of modern calculus.
+
+User: Who described the mathematics of information theory?
+Assistant: Claude /Shannon/ described the mathematics of information theory in 1948.
+
+User: Who came up with the special theory of relativity?
+Assistant: The special theory of relativity was developed by Albert /Einstein/.
+
+User: Which Persian scientist authored the Canon of Medicine?
+Assistant: The Canon of Medicine was written by the Persian scientist /Avicenna|Sina/.
+
+User: What is the atomic number of Magnesium?
+Assistant: /twelve|12/
+
+User: Which branch of math deals with shapes and structures?
+Assistant: The branch of mathematics that focuses on shapes and structures is known as /geometry|topology/.
+
+User: Which materials compose the gas giants in our solar system?
+Assistant: The gas giants in our solar system are primarily composed of /hydrogen/ and /helium/.
+
+Story: Geography
+
+User: Which Nordic country is known for IKEA
+Assistant: IKEA is a /Sweden|Swedish/ company.
+
+User: Which continent consists mostly of ice??
+Assistant: /Antarctic(a)?|Arctic/ is the continent that consists mostly of ice.
+
+User: What is the longest river in the whole of Latin America?
+Assistant: The /Amazon/ river is the longest river in Latin America.
+
+User: In which country do we find kangoroo?
+Assistant: Kangoroos are predominantly found in /Australia/.
+
+User: Which US state is most populated?
+Assistant: /California/ is currently the most populated state in the United States.
+
+User: What is the capital of Indonesia?
+Assistant: The capital of Indonesia is /Jakarta|Nusantara|IKN/.
+
+User: Where is the capital of East Java?
+Assistant: The capital of East Java is /Surabaya/.
+
+Story: Trivia
+
+User: Name Indonesia's top beach destination, known as the island of Gods!
+Assistant: /Bali/ is recognized as Indonesia's premier destination for tourists.
+
+User: What is the favorite sport in India?
+Assistant: /Cricket/ is India's most beloved sport.
+
+User: Which continent is the coldest?
+Assistant: /Antarctica/ is considered as the coldest continent.
+
+User: In which country Mandarin is spoken?
+Assistant: Mandarin is the official language of /China/.
+
+User: Name the big desert close to Mongolia
+Assistant: The /Gobi/ desert is a large desert located near Mongolia.
+
+User: Name the no 1 tallest building in the Middle East
+Assistant: The /Jeddah Tower|Burj Khalifa/ is the tallest building in the Middle East.
+
+User: Which country is famous for its pyramids?
+Assistant: /Egypt/ is well-known for its pyramids, particulary the Giza Pyramid.
+
+Story:  Famous people
+User: Who wrote the poems in Masnavi?
+Assistant: The poems in Masnavi were written by the Persian poet, /Rūmī|Rumi|Jalal/.
+
+User: Who was the first President of USA?
+Assistant: George /Washington/ was the first US president, serving from 1789 to 1797.
+
+User: Who was the fleet commander who travelled to the New World with the flagship Santa Maria?
+Assistant: Christopher /Columbus/ was the fleet commander.
+
+User: Who is the author of LISP?
+Assistant: John /Mc\s?Carthy/ invented LISP in 1958 at the MIT.
+
+User: Who painted Mona Lisa?
+Assistant: The Mona Lisa was painted by the renowned Italian polymath, Leonardo /da Vinci/.
+
+User: Who led the revolution in South Africa
+Assistant: The revolution in South Africa was led by the iconic activitist, Nelson /Mandela/.
+
+User: Who was Britain PM who rallied the British folks during WW 2?
+Assistant: During World War II, Winston /Churchill/ served as the Prime Minister of Britain.
+
+Story: Cuisine
+User: Where is the origin of Biryani: India or Ireland?
+Assistant: Biryani originated from /India/.
+
+User: What is the green paste used with sushi?
+Assistant: The green paste served with sushi is known as /wasabi/.
+
+User: Where is Nasi Lemak originated?
+Assistant: Nasi Lemak is a traditional dish from /Malaysia|Malay/.
+
+User: Name some common patties for burger!
+Assistant: Common patty fillings for burgers include /beef|chicken|turkey|veggie|fish|salmon|brisket/.
+
+User: Who created KFC?
+Assistant: Colonel Harland /Sanders/ created KFC in 1952.
+
+User: Is ramen typically eaten in Egypt or Japan?
+Assistant: Ramen is typically eaten in /Japan/.
+
+User: What is the main ingredient of Nasi Goreng?
+Assistant: Preparing Nasi Goreng involves some /rice|egg(s)?|soy sauce|kecap/.
+
+Story: Movies
+
+User: In Star Trek, what is Captain Kirk’s first name?
+Assistant: Captain Kirk's first name is /James|Jim/.
+
+User: What is the name of that well-known spacecraft from Hans Solo?
+Assistant: That would be the Millennium /Falcon/.
+
+User: What is name of the fictional spy 007?
+Assistant: The name of the fictional spy known as 007 is /Bond|James/.
+
+User: Who directed the Dark Knight movie?
+Assistant: The Dark Knight movie was directed by Christopher /Nolan/.
+
+User: Who is Spiderman real name?
+Assistant: The real name of Spiderman is Peter /Parker/.
+
+User: Which fictional metal is infused into Wolverine body?
+Assistant: The metal infused into Wolverine's body is /adamantium/.
+
+User: In Aladdin movie, name the princess!
+Assistant: Princess /Jasmine/.
