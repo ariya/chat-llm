@@ -26,3 +26,19 @@ jobs:
           LLM_API_BASE_URL: https://openrouter.ai/api/v1
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
           LLM_CHAT_MODEL: ${{ matrix.model }}
+
+  high-school-stem:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        model:
+          - meta-llama/llama-3.2-3b-instruct             # $0.0300/$0.0300 [ 128K]
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./chat-llm.js tests/high-school-stem.txt
+        env:
+          LLM_API_BASE_URL: https://openrouter.ai/api/v1
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_CHAT_MODEL: ${{ matrix.model }}
