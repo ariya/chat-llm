@@ -42,3 +42,19 @@ jobs:
           LLM_API_BASE_URL: https://openrouter.ai/api/v1
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
           LLM_CHAT_MODEL: ${{ matrix.model }}
+
+  general-knowledge:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        model:
+          - qwen/qwen-2.5-7b-instruct                    # $0.0400/$0.1000 [  32K]
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./chat-llm.js tests/general-knowledge.txt
+        env:
+          LLM_API_BASE_URL: https://openrouter.ai/api/v1
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_CHAT_MODEL: ${{ matrix.model }}
