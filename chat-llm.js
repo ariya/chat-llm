@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const fs = require('fs');
+const http = require('http');
 const readline = require('readline');
 
 const LLM_API_BASE_URL = process.env.LLM_API_BASE_URL || 'https://api.openai.com/v1';
@@ -422,6 +423,61 @@ const interact = async () => {
     qa();
 }
 
+/**
+ * Starts an HTTP server that listens on the specified port and serves requests.
+ *
+ * @param {number} port - The port number to listen on.
+ */
+const serve = async (port) => {
+    let history = [];
+
+    const decode = (url) => {
+        const parsedUrl = new URL(`http://localhost/${url}`);
+        const { search } = parsedUrl;
+        return decodeURIComponent(search.substring(1)).trim();
+    };
+
+    const server = http.createServer(async (request, response) => {
+        const { url } = request;
+        if (url === '/health') {
+            response.writeHead(200).end('OK');
+        } else if (url === '/' || url === '/index.html') {
+            response.writeHead(200, { 'Content-Type': 'text/html' });
+            response.end(fs.readFileSync('./index.html'));
+        } else if (url.startsWith('/chat')) {
+            const inquiry = decode(url);
+            if (inquiry === '/reset') {
+                history = [];
+                response.write('History cleared.');
+                response.end();
+            } else if (inquiry.length > 0) {
+                console.log(`${YELLOW}>> ${CYAN}${inquiry}${NORMAL}`);
+                response.writeHead(200, { 'Content-Type': 'text/plain' });
+
+                const stream = (text) => {
+                    process.stdout.write(text);
+                    response.write(text);
+                }
+                const delegates = { stream };
+                const context = { inquiry, history, delegates };
+                const start = Date.now();
+                const { answer } = await reply(context);
+                console.log();
+                response.end();
+                const duration = Date.now() - start;
+                history.push({ inquiry, answer, duration });
+            } else {
+                response.writeHead(400).end();
+            }
+        } else {
+            console.error(`${url} is 404!`);
+            response.writeHead(404);
+            response.end();
+        }
+    });
+    server.listen(port);
+    console.log('Listening on port', port);
+};
 
 (async () => {
     console.log(`Using LLM at ${LLM_API_BASE_URL} (model: ${GREEN}${LLM_CHAT_MODEL || 'default'}${NORMAL}).`);
@@ -429,6 +485,11 @@ const interact = async () => {
     const args = process.argv.slice(2);
     args.forEach(evaluate);
     if (args.length == 0) {
-        await interact();
+        const port = parseInt(process.env.HTTP_PORT, 10);
+        if (!Number.isNaN(port) && port > 0 && port < 65536) {
+            await serve(port);
+        } else {
+            await interact();
+        }
     }
 })();

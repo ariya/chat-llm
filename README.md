@@ -1,6 +1,8 @@
 # Chat LLM
 
-**Chat LLM** is a simple, zero-dependency CLI tool to chat with an LLM (large language model). It works seamlessly with both cloud-based LLM services (e.g., [OpenAI GPT](https://platform.openai.com/docs), [Groq](https://groq.com), [OpenRouter](https://openrouter.ai)) and locally hosted LLMs (e.g. [llama.cpp](https://github.com/ggerganov/llama.cpp), [LM Studio](https://lmstudio.ai), [Ollama](https://ollama.com)).
+**Chat LLM** is a simple, zero-dependency tool to chat with an LLM (large language model). It works seamlessly with both cloud-based LLM services (e.g., [OpenAI GPT](https://platform.openai.com/docs), [Groq](https://groq.com), [OpenRouter](https://openrouter.ai)) and locally hosted LLMs (e.g. [llama.cpp](https://github.com/ggerganov/llama.cpp), [LM Studio](https://lmstudio.ai), [Ollama](https://ollama.com)).
+
+Chat LLM is accessible via the terminal or through its minimalist web interface.
 
 To run Chat LLM, ensure that [Node.js](https://nodejs.org) (v18 or higher) or [Bun](https://bun.sh) is installed.
 
@@ -17,6 +19,14 @@ For specific tasks:
 ```bash
 echo "Translate 'thank you' into German" | ./chat-llm.js
 ```
+
+Chat LLM also includes a minimalist front-end web interface. To launch it, specify the environment variable `HTTP_PORT`, for example:
+
+```bash
+HTTP_PORT=5000 ./chat-llm.js
+```
+
+Then, open a web browser and go to `localhost:5000`.
 
 ## Using Local LLM Servers
 
