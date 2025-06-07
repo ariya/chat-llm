@@ -20,6 +20,7 @@ const RED = '\x1b[91m';
 const GREEN = '\x1b[92m';
 const CYAN = '\x1b[36m';
 const GRAY = '\x1b[90m';
+const ARROW = '⇢';
 const CHECK = '✓';
 const CROSS = '✘';
 
@@ -479,8 +480,25 @@ const serve = async (port) => {
     console.log('Listening on port', port);
 };
 
-(async () => {
+const canary = async () => {
     console.log(`Using LLM at ${LLM_API_BASE_URL} (model: ${GREEN}${LLM_CHAT_MODEL || 'default'}${NORMAL}).`);
+    process.stdout.write(`${ARROW} Checking LLM...\r`);
+    const messages = [];
+    messages.push({ role: 'system', content: 'Answer concisely.' });
+    messages.push({ role: 'user', content: 'What is the capital of France?' });
+    try {
+        await chat(messages);
+        console.log(`LLM is ${GREEN}ready${NORMAL} (working as expected).`);
+        console.log();
+    } catch (error) {
+        console.error(`${CROSS} ${RED}Fatal error: LLM is not ready!${NORMAL}`);
+        console.error(error);
+        process.exit(-1);
+    }
+};
+
+(async () => {
+    await canary();
 
     const args = process.argv.slice(2);
     args.forEach(evaluate);
