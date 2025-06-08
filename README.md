@@ -4,6 +4,8 @@
 
 Chat LLM is accessible via the terminal or through its minimalist web interface.
 
+<img src="chat-llm.png" alt="Chat LLM" width="50%" height="50%"/>
+
 To run Chat LLM, ensure that [Node.js](https://nodejs.org) (v18 or higher) or [Bun](https://bun.sh) is installed.
 
 ```bash
