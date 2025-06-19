@@ -480,7 +480,7 @@ const serve = async (port) => {
 };
 
 const canary = async () => {
-    console.log(`Using LLM at ${LLM_API_BASE_URL} (model: ${GREEN}${LLM_CHAT_MODEL || 'default'}${NORMAL}).`);
+    console.log(`Using LLM at ${YELLOW}${LLM_API_BASE_URL}${NORMAL} (model: ${GREEN}${LLM_CHAT_MODEL || 'default'}${NORMAL}).`);
     process.stdout.write(`${ARROW} Checking LLM...\r`);
     const messages = [];
     messages.push({ role: 'system', content: 'Answer concisely.' });
