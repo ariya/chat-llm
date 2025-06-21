@@ -65,7 +65,7 @@ const chat = async (messages, handler = null, attempt = MAX_RETRY_ATTEMPT) => {
     const model = LLM_CHAT_MODEL || 'gpt-4.1-nano';
     const url = `${LLM_API_BASE_URL}/chat/completions`
     const auth = (LLM_API_KEY) ? { 'Authorization': `Bearer ${LLM_API_KEY}` } : {};
-    const stop = ['</s>', '</s>', '</s>'];
+    const stop = ['\\boxed', '</s>', '</s>', '</s>'];
 
     const body = { messages, model, stop,  stream }
 
