@@ -67,7 +67,7 @@ const chat = async (messages, handler = null, attempt = MAX_RETRY_ATTEMPT) => {
     const auth = (LLM_API_KEY) ? { 'Authorization': `Bearer ${LLM_API_KEY}` } : {};
     const stop = ['\\boxed', '</s>', '</s>', '</s>'];
 
-    const body = { messages, model, stop,  stream }
+    const body = { messages, model, stop, stream }
 
     LLM_DEBUG &&
         messages.forEach(({ role, content }) => {
