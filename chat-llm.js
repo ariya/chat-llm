@@ -8,6 +8,7 @@ const LLM_API_BASE_URL = process.env.LLM_API_BASE_URL || 'https://api.openai.com
 const LLM_API_KEY = process.env.LLM_API_KEY || process.env.OPENAI_API_KEY;
 const LLM_CHAT_MODEL = process.env.LLM_CHAT_MODEL;
 const LLM_STREAMING = process.env.LLM_STREAMING !== 'no';
+const LLM_FORCE_REASONING = process.env.LLM_FORCE_REASONING;
 
 const LLM_DEBUG = process.env.LLM_DEBUG;
 const LLM_DEBUG_FAIL_EXIT = process.env.LLM_DEBUG_FAIL_EXIT;
@@ -184,17 +185,35 @@ const chat = async (messages, handler = null, attempt = MAX_RETRY_ATTEMPT) => {
     }
 }
 
-
 const REPLY_PROMPT = `You are a helpful AI assistant. You are chatting with a human user.
-Most of the time your lines should be a sentence or two, unless the user's request requires reasoning or long-form outputs.
+Your answer should be a sentence or two, unless the user's request requires reasoning or long-form outputs.
 Never use emojis, unless explicitly asked to. Never use markdown, always answer in plain text.`;
+
+const REPLY_THINK = `You should first draft your thinking process (inner monologue) until you have derived the final answer.
+Write both your thoughts and answer in the same language as the task posed by the user.
+
+Your thinking process must follow the template below:
+<think>
+Your thoughts or/and draft, like working through an exercise on scratch paper.
+Be as casual and as long as you want until you are confident to generate a correct answer.
+</think>
+
+Remember, your final answer should be a sentence or two, unless the user's request requires reasoning or long-form outputs.
+`;
 
 const reply = async (context) => {
     const { inquiry, history, delegates } = context;
     const { stream } = delegates || {};
 
+    let prompt = REPLY_PROMPT;
+    if (LLM_FORCE_REASONING) {
+        prompt + '\n';
+        prompt + '\n';
+        prompt += REPLY_THINK;
+    }
+
     const messages = [];
-    messages.push({ role: 'system', content: REPLY_PROMPT });
+    messages.push({ role: 'system', content: prompt });
     const relevant = history.slice(-5);
     relevant.forEach(msg => {
         const { inquiry, answer } = msg;
@@ -482,12 +501,19 @@ const serve = async (port) => {
 const canary = async () => {
     console.log(`Using LLM at ${YELLOW}${LLM_API_BASE_URL}${NORMAL} (model: ${GREEN}${LLM_CHAT_MODEL || 'default'}${NORMAL}).`);
     process.stdout.write(`${ARROW} Checking LLM...\r`);
-    const messages = [];
-    messages.push({ role: 'system', content: 'Answer concisely.' });
-    messages.push({ role: 'user', content: 'What is the capital of France?' });
+
+    const inquiry = 'What is the capital of France?';
+    const history = [];
+    const context = { inquiry, history };
     try {
-        await chat(messages);
+        const { answer } = await reply(context);
+        LLM_REASONING_ABILITY = answer.includes(THINK_START) && answer.includes(THINK_STOP);
         console.log(`LLM is ${GREEN}ready${NORMAL} (working as expected).`);
+        if (LLM_REASONING_ABILITY) {
+            console.log(`This is a ${YELLOW}reasoning${NORMAL} model.`);
+        } else {
+            console.log(`This is a regular model, ${MAGENTA}not${NORMAL} capable of self-reasoning.`);
+        }
         console.log();
     } catch (error) {
         console.error(`${CROSS} ${RED}Fatal error: LLM is not ready!${NORMAL}`);
