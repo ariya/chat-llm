@@ -66,9 +66,8 @@ const chat = async (messages, handler = null, attempt = MAX_RETRY_ATTEMPT) => {
     const url = `${LLM_API_BASE_URL}/chat/completions`
     const auth = (LLM_API_KEY) ? { 'Authorization': `Bearer ${LLM_API_KEY}` } : {};
     const stop = ['</s>', '</s>', '</s>'];
-    const max_tokens = 1000;
 
-    const body = { messages, model, stop, max_tokens, stream }
+    const body = { messages, model, stop,  stream }
 
     LLM_DEBUG &&
         messages.forEach(({ role, content }) => {
