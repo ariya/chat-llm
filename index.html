@@ -18,7 +18,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
 
-            const $ = (id) => document.getElementById(id);
+            const $ = (selector) => Array.from(document.querySelectorAll(selector)).pop();
 
             const $div = (cls) => {
                 const el = document.createElement('div');
@@ -26,12 +26,21 @@
                 return el;
             }
 
+            const $details = () => {
+                const el = document.createElement('details');
+                el.setAttribute('open', true);
+                el.appendChild(document.createElement('summary'));
+                el.appendChild(document.createElement('span'));
+                return el;
+            }
+
             function message(type, text) {
                 const el = $div(`speech-bubble-${type} color-${type}`);
                 el.innerText = text || '';
+                (type === 'thought') && el.appendChild($details());
                 const wrapper = $div(`speech speech-${type}`);
                 wrapper.appendChild(el);
-                $('chat').appendChild(wrapper);
+                $('#chat').appendChild(wrapper);
                 setTimeout(() => {
                     el.scrollIntoView();
                 }, 0);
@@ -59,13 +68,28 @@
             // since it'll annoyingly trigger the on-screen keyboard
             function focusInput() {
                 if (!isTouchDevice()) {
-                    $('prompt').focus();
+                    $('#prompt').focus();
                 }
+            }
+
+            const THINK_REGEX = /<think>(.*?)(<\/think>|$)/gs;
+
+            function unthink(input) {
+                const thoughts = [];
+
+                const extract = (match, content) => {
+                    thoughts.push(content.trim());
+                    return '';
+                }
+
+                const answer = input.replace(THINK_REGEX, extract).trim();
+                const thought = thoughts.join(' ');
+                return { thought, answer };
             }
 
             async function ask(question, handler) {
                 message('human', question);
-                $('prompt').blur();
+                $('#prompt').blur();
                 const url = '/chat?' + encodeURIComponent(question);
                 const el = message('loader');
                 el.innerHTML = '<div class=loader></div>';
@@ -73,25 +97,55 @@
 
                 async function get() {
                     const response = await fetch(url);
-                    message('assistant');
-                    let answer = '';
+                    let reply = '';
                     try {
                         const reader = response.body.getReader();
+                        let start = null;
+                        let elapsed = 0;
+                        let thinking = false;
+                        let answering = false;
                         while (true) {
                             const { done, value } = await reader.read();
-                            unmessage('loader');
                             if (done) {
                                 break;
                             }
                             const text = new TextDecoder().decode(value, { stream: true });
-                            answer += text;
-                            stream('assistant', answer);
+                            reply += text;
+                            const { thought, answer } = unthink(reply.trim());
+                            if (thought?.length > 0) {
+                                if (!thinking && !answering) {
+                                    thinking = true;
+                                    start = Date.now();
+                                    unmessage('loader');
+                                    message('thought')
+                                    $('details summary').innerText = 'Thinking...';
+                                } else {
+                                    thinking && !answering && (elapsed = Date.now() - start);
+                                    const ticks = Math.ceil(elapsed / 250)
+                                    const dots = answering ? '' : '.'.repeat(ticks % 3)
+                                    const action = answering ? 'Thought' : 'Thinking';
+                                    const msg = `${action} for ${Math.ceil(elapsed / 1000)}s.${dots}`;
+                                    $('details summary').innerText = msg;
+                                    $('details span').innerText = thought;
+                                }
+                            }
+                            if (answer?.length > 0) {
+                                if (!answering) {
+                                    thinking = false;
+                                    answering = true;
+                                    unmessage('loader');
+                                    message('assistant');
+                                }
+                                stream('assistant', answer);
+                            }
                         }
                     } catch (e) {
                         message('panic', `Something is wrong: ${e.toString()}`);
+                        console.error(e);
                     } finally {
+                        $('details')?.removeAttribute('open');
                         unmessage('loader');
-                        handler && handler(answer);
+                        handler && handler(reply);
                         setTimeout(focusInput, 0);
                     }
                 }
@@ -99,9 +153,9 @@
 
             }
 
-            $('prompt').addEventListener('keydown', function handleKeyInput(event) {
+            $('#prompt').addEventListener('keydown', function handleKeyInput(event) {
                 if (event.key === 'Enter') {
-                    const el = $('prompt');
+                    const el = $('#prompt');
                     const question = el.value.trim();
                     if (question.length > 0) {
                         ask(question);
@@ -133,6 +187,21 @@
             flex-direction: column;
             color: white;
             color-scheme: light;
+        }
+
+        details {
+            padding-left: 1rem;
+            border-left: 0.2rem solid #ddd;
+        }
+
+        details summary {
+            font-style: italic;
+            margin-left: -1.2rem;
+            border-left: 0.2rem solid white;
+        }
+
+        details span {
+            font-size: 85%;
         }
 
         *,
@@ -197,6 +266,7 @@
         }
 
         .speech-loader,
+        .speech-thought,
         .speech-assistant {
             place-items: start;
         }
@@ -206,7 +276,12 @@
             place-items: end;
         }
 
+        .speech-thought {
+            margin-bottom: -.75rem;
+        }
+
         .speech-bubble-loader,
+        .speech-bubble-thought,
         .speech-bubble-assistant,
         .speech-bubble-human,
         .speech-bubble-panic {
@@ -222,12 +297,13 @@
             border: none;
         }
 
-        .speech-bubble-human {
-            border-color: #127475;
+        .speech-bubble-thought {
+            padding: 0 1rem;
+            min-height: 0;
         }
 
-        .speech-bubble-panic {
-            border-color: #9B239D;
+        .color-thought {
+            color: #565958;
         }
 
         .color-assistant {

@@ -186,34 +186,30 @@ const chat = async (messages, handler = null, attempt = MAX_RETRY_ATTEMPT) => {
 }
 
 const REPLY_PROMPT = `You are a helpful AI assistant. You are chatting with a human user.
-Your answer should be a sentence or two, unless the user's request requires reasoning or long-form outputs.
-Never use emojis, unless explicitly asked to. Never use markdown, always answer in plain text.`;
+Your answer should be a sentence or two, unless the user's request requires long-form outputs.
+Never use emojis. Never use markdown. Always answer in plain text.`;
 
-const REPLY_THINK = `You should first draft your thinking process (inner monologue) until you have derived the final answer.
+const REPLY_THINK = `You are a helpful AI assistant. You are chatting with a human user.
+
+You should first draft your thinking process (inner monologue) until you have derived the final answer.
 Write both your thoughts and answer in the same language as the task posed by the user.
 
 Your thinking process must follow the template below:
+
 <think>
 Your thoughts or/and draft, like working through an exercise on scratch paper.
 Be as casual and as long as you want until you are confident to generate a correct answer.
 </think>
 
-Remember, your final answer should be a sentence or two, unless the user's request requires reasoning or long-form outputs.
-`;
+Your answer should be a sentence or two, unless the user's request requires long-form outputs.
+Never use emojis. Never use markdown. Always answer in plain text.`;
 
 const reply = async (context) => {
     const { inquiry, history, delegates } = context;
     const { stream } = delegates || {};
 
-    let prompt = REPLY_PROMPT;
-    if (LLM_FORCE_REASONING) {
-        prompt + '\n';
-        prompt + '\n';
-        prompt += REPLY_THINK;
-    }
-
     const messages = [];
-    messages.push({ role: 'system', content: prompt });
+    messages.push({ role: 'system', content: LLM_FORCE_REASONING ? REPLY_THINK : REPLY_PROMPT });
     const relevant = history.slice(-5);
     relevant.forEach(msg => {
         const { inquiry, answer } = msg;
@@ -352,7 +348,7 @@ const evaluate = async (filename) => {
                     const result = await reply(context);
                     const duration = Date.now() - start;
                     const { answer } = result;
-                    history.push({ inquiry, answer, duration });
+                    history.push({ inquiry, answer: unthink(answer).trim(), duration });
                     ++total;
                 } else if (role === 'Assistant') {
                     const expected = content;
@@ -405,6 +401,39 @@ const evaluate = async (filename) => {
     }
 }
 
+const THINK_START = '<think>';
+const THINK_STOP = '</think>';
+
+const unthink = (input) => {
+    const start = input.indexOf(THINK_START);
+    if (start < 0) {
+        return input;
+    }
+    const end = input.indexOf(THINK_STOP);
+    if (end < 0) {
+        return input.substring(0, start);
+    }
+    return input.substring(0, start) + input.substring(end + 8);
+};
+
+const push = (display, input, threshold = THINK_START.length) => {
+    let { buffer, written, print } = display;
+    buffer += input;
+    if (buffer.length < threshold) {
+        return { buffer, written: '', print };
+    }
+    const incoming = unthink(buffer).trim();
+    if (incoming.length > written.length) {
+        const delta = incoming.substring(written.length);
+        // console.log('update', { written, incoming, delta });
+        print && print(delta);
+        written = incoming;
+    }
+    return { buffer, written, print };
+};
+
+const flush = (display) => push(display, '', 0);
+
 /**
  * Represents the contextual information for each pipeline stage.
  *
@@ -417,7 +446,6 @@ const evaluate = async (filename) => {
 
 const interact = async () => {
     const history = [];
-    const stream = (text) => process.stdout.write(text);
 
     let loop = true;
     const io = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -426,12 +454,16 @@ const interact = async () => {
     const qa = () => {
         io.question(`${YELLOW}>> ${CYAN}`, async (inquiry) => {
             process.stdout.write(NORMAL);
+            const print = (text) => process.stdout.write(text);
+            let display = { buffer: '', written: '', print };
+            const stream = (text) => display = push(display, text);
             const delegates = { stream };
             const context = { inquiry, history, delegates };
             const start = Date.now();
-            const result = await reply(context);
+            await reply(context);
             const duration = Date.now() - start;
-            const { answer } = result;
+            display = flush(display);
+            const answer = display.written;
             history.push({ inquiry, answer, duration });
             console.log();
             console.log();
