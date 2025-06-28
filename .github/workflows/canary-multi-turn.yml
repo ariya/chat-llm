@@ -20,7 +20,7 @@ jobs:
           - mistralai/mistral-7b-instruct-v0.3           # $0.0280/$0.0540 [  32K]
           - mistralai/mistral-small-24b-instruct-2501    # $0.0500/$0.1000 [  32K]
           - google/gemma-3-12b-it                        # $0.0500/$0.1000 [ 128K]
-          - microsoft/phi-3-mini-128k-instruct           # $0.1000/$0.1000 [ 128K]          
+          - microsoft/phi-3-mini-128k-instruct           # $0.1000/$0.1000 [ 128K]
           - qwen/qwen3-8b                                # $0.0350/$0.1380 [ 128K]
           - amazon/nova-micro-v1                         # $0.0350/$0.1400 [ 128K]
           - microsoft/phi-4                              # $0.0700/$0.1400 [  16K]
