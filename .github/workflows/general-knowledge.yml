@@ -14,7 +14,6 @@ jobs:
         model:
           - meta-llama/llama-3.2-3b-instruct             # $0.0100/$0.0200 [ 128K]
           - mistralai/mistral-nemo                       # $0.0100/$0.0270 [ 128K]
-          - meta-llama/llama-3.1-8b-instruct             # $0.0190/$0.0300 [ 128K]
           - google/gemma-3-4b-it                         # $0.0200/$0.0400 [ 128K]
           # FAIL:3 - mistralai/ministral-3b                       # $0.0400/$0.0400 [ 128K]
           - mistralai/mistral-7b-instruct-v0.3           # $0.0280/$0.0540 [  32K]
