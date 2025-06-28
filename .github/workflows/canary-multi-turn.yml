@@ -18,7 +18,6 @@ jobs:
           - google/gemma-3-4b-it                         # $0.0200/$0.0400 [ 128K]
           - mistralai/ministral-3b                       # $0.0400/$0.0400 [ 128K]
           - mistralai/mistral-7b-instruct-v0.3           # $0.0280/$0.0540 [  32K]
-          - qwen/qwen-2.5-7b-instruct                    # $0.0400/$0.1000 [  32K]
           - mistralai/mistral-small-24b-instruct-2501    # $0.0500/$0.1000 [  32K]
           - google/gemma-3-12b-it                        # $0.0500/$0.1000 [ 128K]
           - microsoft/phi-3-mini-128k-instruct           # $0.1000/$0.1000 [ 128K]          
