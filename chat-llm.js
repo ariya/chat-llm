@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env -S sh -c 'command -v node >/dev/null && exec node "$0" "$@" || exec bun "$0" "$@" '
 
 const fs = require('fs');
 const http = require('http');
