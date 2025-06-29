@@ -39,13 +39,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - run: ./chat-llm.js tests/canary-single-turn.txt
+      - run: ./chat-llm.js tests/en/canary-single-turn.txt
         env:
           LLM_API_BASE_URL: https://openrouter.ai/api/v1
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
           LLM_CHAT_MODEL: ${{ matrix.model }}
 
-      - run: ./chat-llm.js tests/canary-multi-turn.txt
+      - run: ./chat-llm.js tests/en/canary-multi-turn.txt
         env:
           LLM_API_BASE_URL: https://openrouter.ai/api/v1
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}

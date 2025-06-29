@@ -42,7 +42,7 @@ jobs:
         uses: ./.github/actions/prepare-llm
         timeout-minutes: 3
 
-      - run: ./chat-llm.js tests/canary-single-turn.txt
+      - run: ./chat-llm.js tests/en/canary-single-turn.txt
         env:
           LLM_API_BASE_URL: 'http://127.0.0.1:8080/v1'
 
@@ -61,7 +61,7 @@ jobs:
         uses: ./.github/actions/prepare-llm
         timeout-minutes: 3
 
-      - run: ./chat-llm.js tests/canary-multi-turn.txt
+      - run: ./chat-llm.js tests/en/canary-multi-turn.txt
         env:
           LLM_API_BASE_URL: 'http://127.0.0.1:8080/v1'
 
