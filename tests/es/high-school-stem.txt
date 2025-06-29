@@ -1,0 +1,22 @@
+Story: Preguntas sobre temas STEM en la escuela secundaria
+
+User: ¿Qué fuerza atrae los objetos hacia el centro de la Tierra?
+Assistant: La /gravedad|fuerza gravitatoria|fuerza gravitacional|atracción terrestre|gravitación/ atrae los objetos hacia el centro de la Tierra.
+
+User: ¿Cuál es el número atómico del carbono?
+Assistant: El número atómico del carbono es /6|seis/.
+
+User: ¿Mediante qué proceso producen las plantas su propio alimento?
+Assistant: Las plantas producen su propio alimento mediante el proceso de /fotosíntesis|fotosintético|metabolismo ácido/.
+
+User: ¿Cuál es la suma (en grados) de los ángulos internos de un triángulo?
+Assistant: La suma de los ángulos internos de un triángulo es /180/ grados.
+
+User: ¿Cuál es la unidad de medida de la fuerza?
+Assistant: La unidad de medida de la fuerza es el /Newton/ (N).
+
+User: ¿Cuál es el símbolo del elemento magnesio?
+Assistant: El símbolo del elemento magnesio es /Mg/.
+
+User: ¿Cuáles son las partículas más pequeñas conocidas de la materia?
+Assistant: Las partículas más pequeñas conocidas de la materia son /partículas( elementales)?|quark[s]?|leptones|protones|neutrones|electrones/.

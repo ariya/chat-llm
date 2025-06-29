@@ -1,0 +1,2 @@
+User: ¿Cuál es el planeta más grande de nuestro sistema solar?
+Assistant: /Jupiter|Júpiter/ es el planeta más grande de nuestro sistema solar.

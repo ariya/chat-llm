@@ -202,7 +202,7 @@ Be as casual and as long as you want until you are confident to generate a corre
 </think>
 
 Your answer should be a sentence or two, unless the user's request requires long-form outputs.
-Never use emojis. Never use markdown. Always answer in plain text.`;
+Never use emojis. Never use markdown. Always answer in plain text and  in the same language as the query.`;
 
 const reply = async (context) => {
     const { inquiry, history, delegates } = context;
