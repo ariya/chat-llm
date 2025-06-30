@@ -13,7 +13,7 @@ User: ¿Cuál es la suma (en grados) de los ángulos internos de un triángulo?
 Assistant: La suma de los ángulos internos de un triángulo es /180/ grados.
 
 User: ¿Cuál es la unidad de medida de la fuerza?
-Assistant: La unidad de medida de la fuerza es el /Newton/ (N).
+Assistant: La unidad de medida de la fuerza es el /nuevoton|Newton/ (N).
 
 User: ¿Cuál es el símbolo del elemento magnesio?
 Assistant: El símbolo del elemento magnesio es /Mg/.
