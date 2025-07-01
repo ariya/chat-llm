@@ -1,0 +1,22 @@
+Story: Fragen zu STEM-Themen in der Oberstufe
+
+User: Welche Kraft zieht Objekte zum Erdmittelpunkt?
+Assistant: Die /Schwerkraft|Erdanziehungskraft|Gewichtskraft|Gravitation(skraft)?/ zieht Objekte zum Erdmittelpunkt.
+
+User: Was ist die Ordnungszahl von Kohlenstoff?
+Assistant: Die Ordnungszahl von Kohlenstoff beträgt /6|sechs/.
+
+User: Durch welchen Prozess erzeugen Pflanzen ihre eigene Nahrung?
+Assistant: Pflanzen erzeugen ihre eigene Nahrung durch den Prozess der /Fotosynthese|Photosynthese|Säurestoffwechsels/.
+
+User: Wie groß ist die Summe (in Grad) der Innenwinkel eines Dreiecks?
+Assistant: Die Summe der Innenwinkel eines Dreiecks beträgt /180/ Grad.
+
+User: Was ist die Einheit der Kraft?
+Assistant: Die Maßeinheit für die Kraft ist das /Newton/ (N).
+
+User: Was ist das Elementsymbol für Magnesium?
+Assistant: Das Elementsymbol für Magnesium ist /Mg/.
+
+User: Was ist die kleinsten bekannten Bausteine der Materie?
+Assistant: Die kleinsten bekannten Bausteine der Materie sind /Elementarteilchen|Quarks|Quanten|Protonen|Leptonen|Atome/.

@@ -1,0 +1,2 @@
+User: Welcher Planet in unserem Sonnensystem ist der größte?
+Assistant: /Jupiter/ ist der größte Planet in unserem Sonnensystem.
