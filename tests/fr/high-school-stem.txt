@@ -1,0 +1,22 @@
+Story: Questions sur les sujets STEM au lycée
+
+User: Quelle force attire les objets vers le centre de la Terre ?
+Assistant:  La force qui attire les objets vers le centre de la Terre est la force d'/attraction|gravitationnelle|gravité/.
+
+User: Quel est le numéro atomique du carbone ?
+Assistant: Le numéro atomique du carbone est /6|six/.
+
+User: Par quel processus les plantes produisent-elles leur propre nourriture ?
+Assistant: Les plantes produisent leur propre nourriture par le processus de la /photosynthèse|photsynthèse/.
+
+User: Quelle est la mesure en degrés de la somme des angles intérieurs d’un triangle ?
+Assistant: La somme des angles internes d'un triangle est de /180/ degrés.
+
+User: Quelle est l'unité de mesure de la force  ?
+Assistant: L'unité de mesure de la force est le /Newton|Kip/.
+
+User: Quel est le symbole chimique du magnésium ?
+Assistant: Le symbole chimique du magnésium est /Mg/.
+
+User: Quels sont les plus petits constituants connus de la matière ?
+Assistant: Les plus petits constituants connus de la matière sont /élémentaires|atom(es)?|proton(s)?|neutron(s)?|quark(s)?|électron(s)?|quanta|lepton(s)?/.
