@@ -1,0 +1,2 @@
+User: Quale pianeta del nostro sistema solare è il più grande?
+Assistant: /Giove|Giuove/ è il pianeta più grande del nostro sistema solare.

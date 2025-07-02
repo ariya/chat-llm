@@ -1,0 +1,62 @@
+name: Italian tests
+
+on: [workflow_dispatch, push, pull_request]
+
+jobs:
+
+  canary-multi-turn:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 3
+    strategy:
+      max-parallel: 3
+      fail-fast: false
+      matrix:
+        model:
+          - meta-llama/llama-3.2-3b-instruct             # $0.0100/$0.0200 [ 128K]
+          - google/gemma-3n-e4b-it                       # $0.0200/$0.0400 [  32K]
+          - google/gemma-3-4b-it                         # $0.0200/$0.0400 [ 128K]
+          - mistralai/mistral-small-3.2-24b-instruct     # $0.0500/$0.1000 [  32K]
+          - google/gemma-3-12b-it                        # $0.0500/$0.1000 [ 128K]
+          - qwen/qwen3-8b                                # $0.0350/$0.1380 [ 128K]
+          - google/gemini-flash-1.5-8b                   # $0.0380/$0.1500 [1000K]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: ./chat-llm.js tests/it/canary-single-turn.txt
+        env:
+          LLM_API_BASE_URL: https://openrouter.ai/api/v1
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_CHAT_MODEL: ${{ matrix.model }}
+
+      - run: ./chat-llm.js tests/it/canary-multi-turn.txt
+        env:
+          LLM_API_BASE_URL: https://openrouter.ai/api/v1
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_CHAT_MODEL: ${{ matrix.model }}
+
+
+  high-school-stem:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    strategy:
+      max-parallel: 3
+      fail-fast: false
+      matrix:
+        model:
+          - meta-llama/llama-3.2-3b-instruct             # $0.0100/$0.0200 [ 128K]
+          - google/gemma-3n-e4b-it                       # $0.0200/$0.0400 [  32K]
+          - google/gemma-3-4b-it                         # $0.0200/$0.0400 [ 128K]
+          - mistralai/mistral-small-3.2-24b-instruct     # $0.0500/$0.1000 [  32K]
+          - google/gemma-3-12b-it                        # $0.0500/$0.1000 [ 128K]
+          - qwen/qwen3-8b                                # $0.0350/$0.1380 [ 128K]
+          - google/gemini-flash-1.5-8b                   # $0.0380/$0.1500 [1000K]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: ./chat-llm.js tests/it/high-school-stem.txt
+        env:
+          LLM_API_BASE_URL: https://openrouter.ai/api/v1
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_CHAT_MODEL: ${{ matrix.model }}
