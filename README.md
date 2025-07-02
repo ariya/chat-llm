@@ -30,6 +30,20 @@ HTTP_PORT=5000 ./chat-llm.js
 
 Then, open a web browser and go to `localhost:5000`.
 
+## Multi-language Support
+
+Chat LLM is capable of conversing in multiple languages beyond English. It consistently responds in the same language as the question posed. Additionally, it supports seamless language switching between queries, as illustrated in the following example:
+
+```
+>> Which planet in our solar system is the largest?
+Jupiter is the largest planet in our solar system.
+
+>> ¿Y el más caliente?
+Venus es el planeta más caliente, con hasta 475 grados Celsius.
+```
+
+The continuous integration workflows for Chat LLM include evaluation tests in English, Spanish, German, French, Italian, and Indonesian.
+
 ## Using Local LLM Servers
 
 Supported local LLM servers include [llama.cpp](https://github.com/ggerganov/llama.cpp), [Jan](https://jan.ai), [Ollama](https://ollama.com), [Cortex](https://cortex.so), [LocalAI](https://localai.io), [LM Studio](https://lmstudio.ai), and [Msty](https://msty.app).
