@@ -1,0 +1,22 @@
+Story: Pertanyaan STEM untuk SMA
+
+User: Apa gaya yang menarik benda-benda menuju pusat Bumi?
+Assistant: Gaya yang menarik benda-benda menuju pusat Bumi dikenal sebagai /gravitasi/.
+
+User: Berapakah nomor atom karbon?
+Assistant: Nomor atom karbon adalah /6|enam/.
+
+User: Proses apakah yang digunakan oleh tumbuhan-tumbuhan untuk membuat makanannya sendiri?
+Assistant: Tumbuhan membuat makanannya sendiri menggunakan /fotosintesis|fotosintesa/.
+
+User: Berapakah jumlah sudut (dalam derajat) pada sebuah segitiga?
+Assistant: Jumlah sudut pada sebuah segitiga adalah /180/ derajat.
+
+User: Apa satuan untuk mengukur gaya?
+Assistant: Satuan untuk mengukur gaya adalah /Newton/ (N).
+
+User: Apa simbol kimia untuk magnesium?
+Assistant: Simbol kimia untuk magnesium adalah /Mg/.
+
+User: Apakah komponent subatomik dari materi?
+Assistant: Unit terkecil dari materi adalah /atom|proton|quark|lepton|partikel/.

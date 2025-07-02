@@ -1,0 +1,2 @@
+User: Sebutkan planet terbesar di tata surya kita!
+Assistant: Planet terbesar di tata surya kita adalah /Jupiter/.
