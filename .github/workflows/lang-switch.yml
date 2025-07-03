@@ -1,0 +1,27 @@
+name: Switch languages
+
+on: [workflow_dispatch, push, pull_request]
+
+jobs:
+
+  lang-switch:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    strategy:
+      max-parallel: 3
+      fail-fast: false
+      matrix:
+        model:
+          - google/gemma-3-4b-it                         # $0.0200/$0.0400 [ 128K]
+          - qwen/qwen3-30b-a3b                           # $0.0800/$0.2900 [  40K]
+          - meta-llama/llama-4-scout                     # $0.0800/$0.3000 [ 320K]
+          - openai/gpt-4.1-nano                          # $0.1000/$0.4000 [1000K]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: ./chat-llm.js tests/lang-switch.txt
+        env:
+          LLM_API_BASE_URL: https://openrouter.ai/api/v1
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_CHAT_MODEL: ${{ matrix.model }}

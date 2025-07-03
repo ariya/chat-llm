@@ -1,0 +1,13 @@
+Story: Switch between different languages
+
+User: Which planet in our solar system is the biggest?
+Assistant: /Jupiter/ is the largest planet in our solar system.
+
+User: ¿Y el más caliente?
+Assistant: /Venus/ es el planeta más caliente de nuestro sistema solar.
+
+User: und derjenige, der den Spitznamen "Der Rote Planet" hat?
+Assistant: /Mars/, aufgrund seines rötlichen Aussehens, das durch Eisenoxid auf seiner Oberfläche verursacht wird.
+
+User: et laquelle est connue pour son système d'anneaux le plus complexe?
+Assistant: Ce doit être /Saturne/ !
