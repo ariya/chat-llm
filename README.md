@@ -44,6 +44,14 @@ Venus es el planeta más caliente, con hasta 475 grados Celsius.
 
 The continuous integration workflows for Chat LLM include evaluation tests in English, Spanish, German, French, Italian, and Indonesian.
 
+[![English tests](https://github.com/ariya/chat-llm/actions/workflows/english.yml/badge.svg)](https://github.com/ariya/chat-llm/actions/workflows/english.yml)
+[![Spanish tests](https://github.com/ariya/chat-llm/actions/workflows/spanish.yml/badge.svg)](https://github.com/ariya/chat-llm/actions/workflows/spanish.yml)
+[![French tests](https://github.com/ariya/chat-llm/actions/workflows/french.yml/badge.svg)](https://github.com/ariya/chat-llm/actions/workflows/french.yml)
+[![German tests](https://github.com/ariya/chat-llm/actions/workflows/german.yml/badge.svg)](https://github.com/ariya/chat-llm/actions/workflows/german.yml)
+[![Italian tests](https://github.com/ariya/chat-llm/actions/workflows/italian.yml/badge.svg)](https://github.com/ariya/chat-llm/actions/workflows/italian.yml)
+[![Indonesian tests](https://github.com/ariya/chat-llm/actions/workflows/indonesian.yml/badge.svg)](https://github.com/ariya/chat-llm/actions/workflows/indonesian.yml)
+[![Language switch](https://github.com/ariya/chat-llm/actions/workflows/lang-switch.yml/badge.svg)](https://github.com/ariya/chat-llm/actions/workflows/lang-switch.yml)
+
 ## Using Local LLM Servers
 
 Supported local LLM servers include [llama.cpp](https://github.com/ggerganov/llama.cpp), [Jan](https://jan.ai), [Ollama](https://ollama.com), [Cortex](https://cortex.so), [LocalAI](https://localai.io), [LM Studio](https://lmstudio.ai), and [Msty](https://msty.app).
