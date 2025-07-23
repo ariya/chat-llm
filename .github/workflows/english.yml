@@ -34,7 +34,7 @@ jobs:
           - meta-llama/llama-4-scout                     # $0.0800/$0.3000 [ 320K]
           - google/gemini-2.0-flash-001                  # $0.1000/$0.4000 [1000K]
           - openai/gpt-4.1-nano                          # $0.1000/$0.4000 [1000K]
-          - google/gemini-2.5-flash-lite-preview-06-17   # $0.1000/$0.4000 [1000K]
+          - google/gemini-2.5-flash-lite                 # $0.1000/$0.4000 [1000K]
 
     steps:
       - uses: actions/checkout@v4
@@ -82,7 +82,7 @@ jobs:
           - meta-llama/llama-4-scout                     # $0.0800/$0.3000 [ 320K]
           - google/gemini-2.0-flash-001                  # $0.1000/$0.4000 [1000K]
           - openai/gpt-4.1-nano                          # $0.1000/$0.4000 [1000K]
-          - google/gemini-2.5-flash-lite-preview-06-17   # $0.1000/$0.4000 [1000K]
+          - google/gemini-2.5-flash-lite                 # $0.1000/$0.4000 [1000K]
 
     steps:
       - uses: actions/checkout@v4
