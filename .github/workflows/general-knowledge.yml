@@ -31,7 +31,6 @@ jobs:
           - meta-llama/llama-3.3-70b-instruct            # $0.0700/$0.2500 [ 128K]
           - qwen/qwen3-30b-a3b                           # $0.0800/$0.2900 [  40K]
           - google/gemini-2.0-flash-lite-001             # $0.0750/$0.3000 [1000K]
-          - meta-llama/llama-4-scout                     # $0.0800/$0.3000 [ 320K]
           - google/gemini-2.0-flash-001                  # $0.1000/$0.4000 [1000K]
           - openai/gpt-4.1-nano                          # $0.1000/$0.4000 [1000K]
           - google/gemini-2.5-flash-lite                 # $0.1000/$0.4000 [1000K]
