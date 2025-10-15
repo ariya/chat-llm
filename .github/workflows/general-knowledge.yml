@@ -24,7 +24,6 @@ jobs:
           - qwen/qwen3-8b                                # $0.0350/$0.1380 [ 128K]
           - amazon/nova-micro-v1                         # $0.0350/$0.1400 [ 128K]
           - microsoft/phi-4                              # $0.0700/$0.1400 [  16K]
-          - google/gemini-flash-1.5-8b                   # $0.0380/$0.1500 [1000K]
           - amazon/nova-lite-v1                          # $0.0600/$0.2400 [ 300K]
           - qwen/qwen3-14b                               # $0.0800/$0.2400 [  40K]
           - mistralai/mixtral-8x7b-instruct              # $0.2400/$0.2400 [  32K]

@@ -17,7 +17,6 @@ jobs:
           - mistralai/mistral-small-3.2-24b-instruct     # $0.0500/$0.1000 [  32K]
           - google/gemma-3-12b-it                        # $0.0500/$0.1000 [ 128K]
           - qwen/qwen3-8b                                # $0.0350/$0.1380 [ 128K]
-          - google/gemini-flash-1.5-8b                   # $0.0380/$0.1500 [1000K]
 
     steps:
       - uses: actions/checkout@v4
@@ -48,7 +47,6 @@ jobs:
           - mistralai/mistral-small-3.2-24b-instruct     # $0.0500/$0.1000 [  32K]
           - google/gemma-3-12b-it                        # $0.0500/$0.1000 [ 128K]
           - qwen/qwen3-8b                                # $0.0350/$0.1380 [ 128K]
-          - google/gemini-flash-1.5-8b                   # $0.0380/$0.1500 [1000K]
 
     steps:
       - uses: actions/checkout@v4
