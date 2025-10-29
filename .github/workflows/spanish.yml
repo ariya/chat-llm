@@ -17,6 +17,7 @@ jobs:
           - google/gemma-3-4b-it                         # $0.0200/$0.0400 [ 128K]
           - mistralai/mistral-small-3.2-24b-instruct     # $0.0500/$0.1000 [  32K]
           - google/gemma-3-12b-it                        # $0.0500/$0.1000 [ 128K]
+          - ibm-granite/granite-4.0-h-micro              # $0.0170/$0.1100 [ 128K]
           - qwen/qwen3-8b                                # $0.0350/$0.1380 [ 128K]
 
     steps:
@@ -48,6 +49,7 @@ jobs:
           - google/gemma-3-4b-it                         # $0.0200/$0.0400 [ 128K]
           - mistralai/mistral-small-3.2-24b-instruct     # $0.0500/$0.1000 [  32K]
           - google/gemma-3-12b-it                        # $0.0500/$0.1000 [ 128K]
+          - ibm-granite/granite-4.0-h-micro              # $0.0170/$0.1100 [ 128K]
           - qwen/qwen3-8b                                # $0.0350/$0.1380 [ 128K]
 
     steps:
