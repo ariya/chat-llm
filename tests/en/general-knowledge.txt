@@ -83,7 +83,7 @@ Assistant: John /Mc\s?Carthy/ invented LISP in 1958 at the MIT.
 User: Who painted Mona Lisa?
 Assistant: The Mona Lisa was painted by the renowned Italian polymath, Leonardo /da Vinci/.
 
-User: Who led the revolution in South Africa
+User: Who was the main leader of the revolution in South Africa
 Assistant: The revolution in South Africa was led by the iconic activitist, Nelson /Mandela/.
 
 User: Who was Britain PM who rallied the British folks during WW 2?
