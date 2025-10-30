@@ -16,6 +16,7 @@ jobs:
           - google/gemma-3-4b-it                         # $0.0200/$0.0400 [ 128K]
           - mistralai/ministral-3b                       # $0.0400/$0.0400 [ 128K]
           - microsoft/phi-4-multimodal-instruct          # $0.0500/$0.1000 [ 128K]
+          - z-ai/glm-4-32b                               # $0.1000/$0.1000 [ 128K]
           - ibm-granite/granite-4.0-h-micro              # $0.0170/$0.1100 [ 128K]
           - qwen/qwen3-8b                                # $0.0350/$0.1380 [ 128K]
 
@@ -47,6 +48,7 @@ jobs:
           - google/gemma-3-4b-it                         # $0.0200/$0.0400 [ 128K]
           - mistralai/ministral-3b                       # $0.0400/$0.0400 [ 128K]
           - microsoft/phi-4-multimodal-instruct          # $0.0500/$0.1000 [ 128K]
+          - z-ai/glm-4-32b                               # $0.1000/$0.1000 [ 128K]
           - ibm-granite/granite-4.0-h-micro              # $0.0170/$0.1100 [ 128K]
           - qwen/qwen3-8b                                # $0.0350/$0.1380 [ 128K]
 

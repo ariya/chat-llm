@@ -13,6 +13,7 @@ jobs:
       matrix:
         model:
           - google/gemma-3-4b-it                         # $0.0200/$0.0400 [ 128K]
+          - z-ai/glm-4-32b                               # $0.1000/$0.1000 [ 128K]
           - qwen/qwen3-8b                                # $0.0350/$0.1380 [ 128K]
           - meta-llama/llama-3.3-70b-instruct            # $0.1300/$0.3800 [ 128K]
 
@@ -41,6 +42,7 @@ jobs:
       matrix:
         model:
           - google/gemma-3-4b-it                         # $0.0200/$0.0400 [ 128K]
+          - z-ai/glm-4-32b                               # $0.1000/$0.1000 [ 128K]
           - qwen/qwen3-8b                                # $0.0350/$0.1380 [ 128K]
           - meta-llama/llama-3.3-70b-instruct            # $0.1300/$0.3800 [ 128K]
 
