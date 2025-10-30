@@ -18,9 +18,6 @@ jobs:
           - microsoft/phi-4-multimodal-instruct          # $0.0500/$0.1000 [ 128K]
           - ibm-granite/granite-4.0-h-micro              # $0.0170/$0.1100 [ 128K]
           - qwen/qwen3-8b                                # $0.0350/$0.1380 [ 128K]
-          - amazon/nova-micro-v1                         # $0.0350/$0.1400 [ 128K]
-          - openai/gpt-4.1-nano                          # $0.1000/$0.4000 [1000K]
-          - google/gemini-2.5-flash-lite                 # $0.1000/$0.4000 [1000K]
 
     steps:
       - uses: actions/checkout@v4
@@ -52,9 +49,6 @@ jobs:
           - microsoft/phi-4-multimodal-instruct          # $0.0500/$0.1000 [ 128K]
           - ibm-granite/granite-4.0-h-micro              # $0.0170/$0.1100 [ 128K]
           - qwen/qwen3-8b                                # $0.0350/$0.1380 [ 128K]
-          - amazon/nova-micro-v1                         # $0.0350/$0.1400 [ 128K]
-          - openai/gpt-4.1-nano                          # $0.1000/$0.4000 [1000K]
-          - google/gemini-2.5-flash-lite                 # $0.1000/$0.4000 [1000K]
 
     steps:
       - uses: actions/checkout@v4
