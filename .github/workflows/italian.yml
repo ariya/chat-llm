@@ -14,7 +14,6 @@ jobs:
         model:
           - google/gemma-3n-e4b-it                       # $0.0200/$0.0400 [  32K]
           - google/gemma-3-4b-it                         # $0.0200/$0.0400 [ 128K]
-          - mistralai/ministral-3b                       # $0.0400/$0.0400 [ 128K]
           - google/gemma-3-12b-it                        # $0.0500/$0.1000 [ 128K]
           - qwen/qwen3-8b                                # $0.0350/$0.1380 [ 128K]
 
@@ -44,7 +43,6 @@ jobs:
         model:
           - google/gemma-3n-e4b-it                       # $0.0200/$0.0400 [  32K]
           - google/gemma-3-4b-it                         # $0.0200/$0.0400 [ 128K]
-          - mistralai/ministral-3b                       # $0.0400/$0.0400 [ 128K]
           - google/gemma-3-12b-it                        # $0.0500/$0.1000 [ 128K]
           - qwen/qwen3-8b                                # $0.0350/$0.1380 [ 128K]
 
