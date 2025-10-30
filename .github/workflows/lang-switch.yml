@@ -13,7 +13,6 @@ jobs:
       matrix:
         model:
           - google/gemma-3-4b-it                         # $0.0200/$0.0400 [ 128K]
-          - qwen/qwen3-30b-a3b                           # $0.0800/$0.2900 [  40K]
           - openai/gpt-4.1-nano                          # $0.1000/$0.4000 [1000K]
 
     steps:

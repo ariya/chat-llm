@@ -42,7 +42,7 @@ Jupiter is the largest planet in our solar system.
 Venus es el planeta más caliente, con hasta 475 grados Celsius.
 ```
 
-The continuous integration workflows for Chat LLM include evaluation tests in English, Spanish, German, French, Italian, and Indonesian.
+The continuous integration workflows for Chat LLM include evaluation tests in English, Spanish, German, French, Italian, and Indonesian. All tests are conducted with LLMs that have at least a 128K context window length.
 
 [![English tests](https://github.com/ariya/chat-llm/actions/workflows/english.yml/badge.svg)](https://github.com/ariya/chat-llm/actions/workflows/english.yml)
 [![Spanish tests](https://github.com/ariya/chat-llm/actions/workflows/spanish.yml/badge.svg)](https://github.com/ariya/chat-llm/actions/workflows/spanish.yml)
