@@ -11,7 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         model:
-          - meta-llama/llama-3.2-3b-instruct             # $0.0200/$0.0200 [  16K]
+          - meta-llama/llama-3.2-3b-instruct             # $0.0200/$0.0200 [ 128K]
     steps:
       - uses: actions/checkout@v4
 
