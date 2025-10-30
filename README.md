@@ -56,13 +56,13 @@ The continuous integration workflows for Chat LLM include evaluation tests in En
 
 Supported local LLM servers include [llama.cpp](https://github.com/ggerganov/llama.cpp), [Jan](https://jan.ai), [Ollama](https://ollama.com), [LocalAI](https://localai.io), [LM Studio](https://lmstudio.ai), and [Msty](https://msty.app).
 
-To utilize [llama.cpp](https://github.com/ggerganov/llama.cpp) locally with its inference engine, load a quantized model like [Llama-3.2 3B](https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF) or [Phi-3.5 Mini](https://huggingface.co/bartowski/Phi-3.5-mini-instruct-GGUF). Then set the `LLM_API_BASE_URL` environment variable:
+To utilize [llama.cpp](https://github.com/ggerganov/llama.cpp) locally with its inference engine, load a quantized model like [Llama-3.2 3B](https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF) or [Gemma-3 4B](https://huggingface.co/bartowski/google_gemma-3-4b-it-GGUF). Then set the `LLM_API_BASE_URL` environment variable:
 ```bash
 /path/to/llama-server -m Llama-3.2-3B-Instruct-Q4_K_M.gguf
 export LLM_API_BASE_URL=http://127.0.0.1:8080/v1
 ```
 
-To use [Jan](https://jan.ai) with its local API server, refer to [its documentation](https://jan.ai/docs/local-api). Load a model like [Llama-3.2 3B](https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF) or [Phi-3.5 Mini](https://huggingface.co/bartowski/Phi-3.5-mini-instruct-GGUF), and set the following environment variables:
+To use [Jan](https://jan.ai) with its local API server, refer to [its documentation](https://jan.ai/docs/local-api). Load a model like [Llama-3.2 3B](https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF) or [Gemma-3 4B](https://huggingface.co/bartowski/google_gemma-3-4b-it-GGUF), and set the following environment variables:
 ```bash
 export LLM_API_BASE_URL=http://127.0.0.1:1337/v1
 export LLM_CHAT_MODEL='llama3-8b-instruct'
