@@ -121,7 +121,7 @@ const chat = async (messages, handler = null, attempt = MAX_RETRY_ATTEMPT) => {
                     const { choices } = JSON.parse(payload);
                     const [choice] = choices;
                     const { delta } = choice;
-                    partial = delta?.content;
+                    partial = delta?.content || '';
                 } catch (e) {
                     // ignore
                 } finally {
