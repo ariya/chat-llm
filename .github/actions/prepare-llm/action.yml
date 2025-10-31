@@ -6,12 +6,12 @@ runs:
     - name: Download and unpack llama.cpp
       shell: bash
       run: |
-        curl -OL https://github.com/ggerganov/llama.cpp/releases/download/b4003/llama-b4003-bin-ubuntu-x64.zip
-        unzip llama-b4003-bin-ubuntu-x64.zip
+        curl -OL https://github.com/ggerganov/llama.cpp/releases/download/b6887/llama-b6887-bin-ubuntu-x64.zip
+        unzip llama-b6887-bin-ubuntu-x64.zip
 
     - name: Launch llama.cpp
       shell: bash
-      run: ./build/bin/llama-server -c 4096 --hf-repo unsloth/SmolLM2-1.7B-Instruct-GGUF --hf-file SmolLM2-1.7B-Instruct-Q6_K.gguf &
+      run: ./build/bin/llama-server -c 4096 --hf-repo unsloth/granite-4.0-h-1b-GGUF --hf-file granite-4.0-h-1b-IQ4_XS.gguf &
 
     - name: Wait until it is ready
       shell: bash
