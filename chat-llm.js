@@ -425,7 +425,6 @@ const push = (display, input, threshold = THINK_START.length) => {
     const incoming = unthink(buffer).trim();
     if (incoming.length > written.length) {
         const delta = incoming.substring(written.length);
-        // console.log('update', { written, incoming, delta });
         print && print(delta);
         written = incoming;
     }
