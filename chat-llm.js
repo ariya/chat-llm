@@ -80,7 +80,8 @@ const chat = async (messages, handler = null, attempt = MAX_RETRY_ATTEMPT) => {
         const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', ...auth },
-            body: JSON.stringify(body)
+            body: JSON.stringify(body),
+            signal: AbortSignal.timeout(timeout * 1000)
         });
         if (!response.ok) {
             throw new Error(`HTTP error with the status: ${response.status} ${response.statusText}`);
