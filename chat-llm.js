@@ -63,7 +63,7 @@ const MAX_RETRY_ATTEMPT = 3;
 const chat = async (messages, handler = null, attempt = MAX_RETRY_ATTEMPT) => {
     const timeout = 17; // seconds
     const stream = LLM_STREAMING && typeof handler === 'function';
-    const model = LLM_CHAT_MODEL || 'gpt-4.1-nano';
+    const model = LLM_CHAT_MODEL || 'gpt-5-nano';
     const url = `${LLM_API_BASE_URL}/chat/completions`
     const auth = (LLM_API_KEY) ? { 'Authorization': `Bearer ${LLM_API_KEY}` } : {};
     const stop = ['\\boxed', '</s>', '</s>', '</s>'];
