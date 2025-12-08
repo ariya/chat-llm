@@ -1,0 +1,22 @@
+{
+  "version": "2.0",
+  "apiDefaults": {
+    "timeout": 30,
+    "retries": 3,
+    "streaming": true
+  },
+  "caching": {
+    "enabled": true,
+    "ttl": 86400000
+  },
+  "logging": {
+    "enabled": true,
+    "level": "info",
+    "maxFileSize": 10485760
+  },
+  "models": {
+    "default": "gpt-4",
+    "temperature": 0.9,
+    "maxTokens": 2000
+  }
+}

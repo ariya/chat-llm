@@ -27,6 +27,14 @@ jobs:
       - run: cat output.txt
       - run: grep -i jupiter output.txt
 
+      - name: Check for uncommitted changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Error: Uncommitted changes detected after running tests"
+            git status --porcelain
+            exit 1
+          fi
+
 
   canary-single-turn:
     runs-on: ubuntu-22.04
@@ -46,6 +54,14 @@ jobs:
         env:
           LLM_API_BASE_URL: 'http://127.0.0.1:8080/v1'
 
+      - name: Check for uncommitted changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Error: Uncommitted changes detected after running tests"
+            git status --porcelain
+            exit 1
+          fi
+
   canary-multi-turn:
     runs-on: ubuntu-22.04
     needs: canary-single-turn
@@ -64,4 +80,12 @@ jobs:
       - run: ./chat-llm.js tests/en/canary-multi-turn.txt
         env:
           LLM_API_BASE_URL: 'http://127.0.0.1:8080/v1'
+
+      - name: Check for uncommitted changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Error: Uncommitted changes detected after running tests"
+            git status --porcelain
+            exit 1
+          fi
 
