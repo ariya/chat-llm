@@ -17,6 +17,10 @@ const { ErrorHandler } = require('./tools/error-handler');
 const { PluginManager } = require('./tools/plugin-manager');
 const { EventBusManager } = require('./tools/event-bus');
 const { PerformanceMonitor } = require('./tools/performance-monitor');
+const { AnalyticsEngine } = require('./tools/analytics-engine');
+const { ModelRouter } = require('./tools/model-router');
+const { ConversationManager } = require('./tools/conversation-manager');
+const { AdvancedCache } = require('./tools/advanced-cache');
 
 const LLM_API_BASE_URL = process.env.LLM_API_BASE_URL || 'https://api.openai.com/v1';
 const LLM_API_KEY = process.env.LLM_API_KEY || process.env.OPENAI_API_KEY;
@@ -63,6 +67,10 @@ const errorHandler = new ErrorHandler();
 const plugins = new PluginManager();
 const eventBus = new EventBusManager();
 const performance = new PerformanceMonitor();
+const analytics = new AnalyticsEngine('./analytics');
+const modelRouter = new ModelRouter();
+const conversationManager = new ConversationManager('./conversations');
+const advancedCache = new AdvancedCache({ storageDir: './cache/advanced' });
 
 /**
  * Suspends the execution for a specified amount of time.
