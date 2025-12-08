@@ -112,6 +112,31 @@ Chat LLM automatically caches responses for 24 hours to avoid repeated calls to 
 
 When caching is disabled via the config command, Chat LLM immediately falls back to live responses without touching the cache. Re-enabling restores the 24-hour TTL without restarting the app.
 
+## Agent, Context, and Memory Orchestration
+
+Activating an agent (`./chat-llm.js agent-activate coder`) now feeds that persona’s system prompt straight into every chat request, so the CLI/web UI instantly adopts the tone and capabilities of the selected specialist. The active context (`context-create`, `context-activate`) is summarized and injected as another system message, giving the LLM a compact view of your tagged data and uploaded documents before it answers.
+
+```bash
+./chat-llm.js agent-list
+./chat-llm.js agent-activate researcher
+./chat-llm.js context-create customer-success
+./chat-llm.js context-activate customer-success
+./chat-llm.js memory-list
+./chat-llm.js memory-stats
+```
+
+Terminal and web sessions persist into the new Memory Manager (`./memory/`), so `memory-list` can replay full transcripts even across restarts. Each cache hit is streamed via the existing delegate, logged with metadata (agent, context, model), and recorded in memory so you can audit automated workflows.
+
+## Prompt Templates
+
+The Prompt Manager ships with battle-tested templates for analysis, coding, research, and more. You can now render them directly from the CLI with inline variables:
+
+```bash
+./chat-llm.js prompt-run analysis data="Q4 sales dipped 14%" focus="root-cause, mitigation"
+```
+
+Combine this with `prompt-list` and `prompt-render` to inspect or extend the templates before handing the generated instructions to the chat runtime.
+
 ## Multi-language Support
 
 Chat LLM is capable of conversing in multiple languages beyond English. It consistently responds in the same language as the question posed. Additionally, it supports seamless language switching between queries, as illustrated in the following example:

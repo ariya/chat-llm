@@ -94,6 +94,9 @@ const json = context.exportContext('research', 'json');
 
 # View template
 ./chat-llm.js prompt-render analysis
+
+# Render template with variables
+./chat-llm.js prompt-run analysis data="Revenue dropped 10%" focus="root-cause" recommendations="yes"
 ```
 
 ### Programmatic Usage
@@ -141,6 +144,8 @@ prompts.createTemplate('custom-analysis', 'Custom Analysis',
 # View memory statistics
 ./chat-llm.js memory-stats
 ```
+
+Interactive CLI sessions and the minimalist web UI automatically persist into the Memory Manager, so running `memory-list` after a chat will show the transcript even after restarting the process. Cache hits are also written to memory so you can audit an entire workflow run.
 
 ### Programmatic Usage
 

@@ -16,22 +16,13 @@ const { WorkflowManager } = require('./tools/workflow-manager');
 const { ErrorHandler } = require('./tools/error-handler');
 const { PluginManager } = require('./tools/plugin-manager');
 const { EventBusManager } = require('./tools/event-bus');
+const { PerformanceMonitor } = require('./tools/performance-monitor');
 
 const LLM_API_BASE_URL = process.env.LLM_API_BASE_URL || 'https://api.openai.com/v1';
 const LLM_API_KEY = process.env.LLM_API_KEY || process.env.OPENAI_API_KEY;
 const LLM_CHAT_MODEL = process.env.LLM_CHAT_MODEL;
 const LLM_STREAMING = process.env.LLM_STREAMING !== 'no';
 const LLM_FORCE_REASONING = process.env.LLM_FORCE_REASONING;
-
-let LLM_MODEL_CONFIGS = {};
-if (process.env.LLM_MODEL_CONFIGS) {
-    try {
-        LLM_MODEL_CONFIGS = JSON.parse(process.env.LLM_MODEL_CONFIGS);
-    } catch (e) {
-        console.error(`${RED}Error parsing LLM_MODEL_CONFIGS: ${e.message}${NORMAL}`);
-        process.exit(-1);
-    }
-}
 
 const LLM_DEBUG = process.env.LLM_DEBUG;
 const LLM_DEBUG_FAIL_EXIT = process.env.LLM_DEBUG_FAIL_EXIT;
@@ -48,12 +39,22 @@ const ARROW = '⇢';
 const CHECK = '✓';
 const CROSS = '✘';
 
+let LLM_MODEL_CONFIGS = {};
+if (process.env.LLM_MODEL_CONFIGS) {
+    try {
+        LLM_MODEL_CONFIGS = JSON.parse(process.env.LLM_MODEL_CONFIGS);
+    } catch (e) {
+        console.error(`${RED}Error parsing LLM_MODEL_CONFIGS: ${e.message}${NORMAL}`);
+        process.exit(-1);
+    }
+}
+
 // Initialize v2 managers
 const cache = new ResponseCache('./cache');
 const config = new ConfigManager('./config');
 const logger = new RequestLogger('./logs');
 const agents = new AgentManager();
-const context = new ContextManager('./context-data');
+const contextManager = new ContextManager('./context-data');
 const prompts = new PromptManager();
 const memory = new MemoryManager('./memory');
 const tasks = new TaskManager();
@@ -61,6 +62,7 @@ const workflows = new WorkflowManager();
 const errorHandler = new ErrorHandler();
 const plugins = new PluginManager();
 const eventBus = new EventBusManager();
+const performance = new PerformanceMonitor();
 
 /**
  * Suspends the execution for a specified amount of time.
@@ -71,6 +73,33 @@ const eventBus = new EventBusManager();
 const sleep = async (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const MAX_RETRY_ATTEMPT = 3;
+
+const sanitizeContextValue = (value, limit = 160) => {
+    if (value === null || value === undefined) {
+        return '';
+    }
+    const str = typeof value === 'string' ? value : JSON.stringify(value);
+    if (str.length <= limit) {
+        return str;
+    }
+    return `${str.slice(0, limit)}…`;
+};
+
+const buildContextPrompt = (ctx) => {
+    if (!ctx) {
+        return '';
+    }
+    const dataEntries = Object.entries(ctx.data || {}).slice(0, 5)
+        .map(([key, val]) => `- ${key}: ${sanitizeContextValue(val)}`);
+    const documentEntries = (ctx.documents || []).slice(0, 3)
+        .map(doc => `- ${doc.name} (${doc.size} bytes)`);
+    const tags = ctx.tags?.length ? ctx.tags.join(', ') : 'none';
+    return `Active context "${ctx.name}" (tags: ${tags})
+Data:
+${dataEntries.join('\n') || '- none'}
+Documents:
+${documentEntries.join('\n') || '- none'}`;
+};
 
 
 /**
@@ -297,53 +326,131 @@ const demoReply = async (inquiry) => {
     return DEMO_RESPONSES.default[Math.floor(Math.random() * DEMO_RESPONSES.default.length)];
 };
 
-const reply = async (context) => {
-    const { inquiry, history, delegates } = context;
+const reply = async (requestContext) => {
+    const { inquiry, history, delegates, conversationId, metadata = {} } = requestContext;
     const { stream } = delegates || {};
+    const cacheEnabled = config.get('caching.enabled', true);
+    const activeAgent = agents.getActiveAgent();
+    const activeContext = contextManager.getActiveContext();
+    const logMetadata = {
+        cached: false,
+        agent: activeAgent ? activeAgent.id : 'default',
+        context: activeContext ? activeContext.name : null
+    };
+    const sessionSource = metadata.source || 'cli';
+    const operationStart = Date.now();
 
-    // Check cache first if caching is enabled
-    let cacheEnabled = config.get('caching.enabled', true);
-    let cachedResponse = cacheEnabled ? cache.get(inquiry) : null;
-    
+    const recordMemory = (role, content, extra = {}) => {
+        if (!conversationId) {
+            return;
+        }
+        memory.ensureConversation(conversationId, {
+            source: sessionSource,
+            agent: logMetadata.agent,
+            context: logMetadata.context
+        });
+        memory.addMessage(conversationId, role, content, {
+            source: sessionSource,
+            ...extra
+        });
+    };
+
+    recordMemory('user', inquiry, { role: 'user' });
+
+    const cachedResponse = cacheEnabled ? cache.get(inquiry) : null;
     if (cachedResponse) {
+        logMetadata.model = 'cache';
         if (typeof stream === 'function') {
             stream(cachedResponse);
         }
-        logger.logRequest('reply', inquiry, cachedResponse, 0, { cached: true });
-        return { answer: cachedResponse, ...context };
+        recordMemory('assistant', cachedResponse, { cached: true });
+        performance.record('reply', Date.now() - operationStart, { cached: true, agent: logMetadata.agent });
+        await eventBus.publish('chat:cache-hit', {
+            inquiry,
+            answer: cachedResponse,
+            agent: logMetadata.agent,
+            context: logMetadata.context
+        });
+        logger.logRequest('reply', inquiry, cachedResponse.substring(0, 100), 0, {
+            ...logMetadata,
+            cached: true
+        });
+        return { answer: cachedResponse, rawAnswer: cachedResponse, ...requestContext };
     }
 
     const messages = [];
-    messages.push({ role: 'system', content: LLM_FORCE_REASONING ? REPLY_THINK : REPLY_PROMPT });
+    let systemPrompt = LLM_FORCE_REASONING ? REPLY_THINK : REPLY_PROMPT;
+    if (activeAgent) {
+        systemPrompt += `\n\nActive agent (${activeAgent.name}):\n${activeAgent.systemPrompt}`;
+    }
+    messages.push({ role: 'system', content: systemPrompt });
+
+    if (activeContext) {
+        messages.push({ role: 'system', content: buildContextPrompt(activeContext) });
+    }
+
     const relevant = history.slice(-5);
     relevant.forEach(msg => {
-        const { inquiry, answer } = msg;
-        messages.push({ role: 'user', content: inquiry });
+        const { inquiry: previousInquiry, answer } = msg;
+        messages.push({ role: 'user', content: previousInquiry });
         messages.push({ role: 'assistant', content: answer });
     });
 
     messages.push({ role: 'user', content: inquiry });
 
     let selectedModel = null;
-    // Check if the user explicitly requested a model in the inquiry
     const modelMatch = inquiry.match(/<use_model>(.*?)<\/use_model>/);
     if (modelMatch && modelMatch[1]) {
         selectedModel = modelMatch[1].trim();
     }
-    
-    let rawAnswer;
+    logMetadata.model = selectedModel || (LLM_CHAT_MODEL || 'default');
+
+    const pluginResult = await plugins.executeHook('chat:before', {
+        inquiry,
+        messages,
+        agent: logMetadata.agent,
+        context: logMetadata.context,
+        conversationId
+    });
+    if (
+        pluginResult &&
+        Array.isArray(pluginResult.messages) &&
+        pluginResult.messages !== messages &&
+        pluginResult.messages.length > 0
+    ) {
+        messages.length = 0;
+        pluginResult.messages.forEach(msg => messages.push(msg));
+    }
+
+    await eventBus.publish('chat:request', {
+        inquiry,
+        agent: logMetadata.agent,
+        context: logMetadata.context,
+        model: logMetadata.model
+    });
+
+    let rawAnswer = '';
+    let duration = 0;
     try {
         const start = Date.now();
         rawAnswer = await chat(messages, stream, MAX_RETRY_ATTEMPT, selectedModel);
-        const duration = Date.now() - start;
-        logger.logRequest('reply', inquiry, rawAnswer.substring(0, 100), duration);
+        duration = Date.now() - start;
     } catch (error) {
         if (process.env.LLM_DEMO_MODE) {
             rawAnswer = await demoReply(inquiry);
+            logMetadata.demo = true;
         } else {
             throw error;
         }
     }
+
+    await eventBus.publish('chat:response', {
+        inquiry,
+        answer: rawAnswer,
+        agent: logMetadata.agent,
+        context: logMetadata.context,
+        duration
+    });
 
     const THINK_START_TAG = '<think>';
     const THINK_STOP_TAG = '</think>';
@@ -352,7 +459,6 @@ const reply = async (context) => {
 
     const thinkStartIndex = rawAnswer.indexOf(THINK_START_TAG);
     const thinkStopIndex = rawAnswer.indexOf(THINK_STOP_TAG);
-
 
     if (thinkStartIndex !== -1 && thinkStopIndex !== -1) {
         const thinkContent = rawAnswer.substring(thinkStartIndex + THINK_START_TAG.length, thinkStopIndex);
@@ -363,29 +469,48 @@ const reply = async (context) => {
             const toolCode = thinkContent.substring(toolCodeStartIndex + TOOL_CODE_START_TAG.length, toolCodeStopIndex);
             let toolOutput = '';
             try {
-                // Execute the tool code in a sandboxed environment
-                // For simplicity, using eval here. In a real-world scenario, consider a more secure sandbox.
                 const consoleLog = (output) => { toolOutput += JSON.stringify(output) + '\n'; };
-                const context = { analyzeSentiment, console: { log: consoleLog } };
+                const sandbox = { analyzeSentiment, console: { log: consoleLog } };
                 const script = new Function('analyzeSentiment', 'console', toolCode);
-                script(context.analyzeSentiment, context.console);
+                script(sandbox.analyzeSentiment, sandbox.console);
             } catch (e) {
                 toolOutput = `Error executing tool: ${e.message}`;
             }
 
-            // Re-prompt the LLM with the tool output
-            messages.push({ role: 'assistant', content: rawAnswer }); // Add the LLM's initial thought process
+            messages.push({ role: 'assistant', content: rawAnswer });
             messages.push({ role: 'system', content: `Tool output:\n${toolOutput}` });
             messages.push({ role: 'user', content: 'Given the tool output, provide your final answer.' });
             rawAnswer = await chat(messages, stream);
         }
     }
 
-    if (cacheEnabled && rawAnswer && rawAnswer.length > 0) {
-        cache.set(inquiry, rawAnswer);
+    const sanitizedAnswer = unthink(rawAnswer).trim() || rawAnswer;
+
+    if (cacheEnabled && sanitizedAnswer.length > 0) {
+        cache.set(inquiry, sanitizedAnswer);
     }
 
-    return { answer: rawAnswer, ...context };
+    recordMemory('assistant', sanitizedAnswer, { cached: false, duration });
+    performance.record('reply', Date.now() - operationStart, {
+        cached: false,
+        agent: logMetadata.agent,
+        context: logMetadata.context
+    });
+    await plugins.executeHook('chat:after', {
+        inquiry,
+        answer: sanitizedAnswer,
+        rawAnswer,
+        agent: logMetadata.agent,
+        context: logMetadata.context,
+        conversationId
+    });
+
+    logger.logRequest('reply', inquiry, sanitizedAnswer.substring(0, 100), duration, {
+        ...logMetadata,
+        cached: false
+    });
+
+    return { answer: sanitizedAnswer, rawAnswer, ...requestContext };
 }
 
 /**
@@ -507,10 +632,10 @@ const evaluate = async (filename) => {
                     history = [];
                 } else if (role === 'User') {
                     const inquiry = content;
-                    const context = { inquiry, history };
+                    const request = { inquiry, history };
                     process.stdout.write(`  ${inquiry}\r`);
                     const start = Date.now();
-                    const result = await reply(context);
+                    const result = await reply(request);
                     const duration = Date.now() - start;
                     const { answer } = result;
                     history.push({ inquiry, answer: unthink(answer).trim(), duration });
@@ -610,6 +735,8 @@ const flush = (display) => push(display, '', 0);
 
 const interact = async () => {
     const history = [];
+    const conversationId = `cli-${Date.now()}`;
+    const metadata = { source: 'cli' };
 
     let loop = true;
     const io = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -622,9 +749,9 @@ const interact = async () => {
             let display = { buffer: '', written: '', print };
             const stream = (text) => display = push(display, text);
             const delegates = { stream };
-            const context = { inquiry, history, delegates };
+            const request = { inquiry, history, delegates, conversationId, metadata };
             const start = Date.now();
-            await reply(context);
+            await reply(request);
             const duration = Date.now() - start;
             display = flush(display);
             const answer = display.written;
@@ -645,6 +772,8 @@ const interact = async () => {
  */
 const serve = async (port) => {
     let history = [];
+    let conversationId = `web-${Date.now()}`;
+    const metadata = { source: 'web' };
 
     const decode = (url) => {
         const parsedUrl = new URL(`http://localhost/${url}`);
@@ -663,6 +792,7 @@ const serve = async (port) => {
             const inquiry = decode(url);
             if (inquiry === '/reset') {
                 history = [];
+                conversationId = `web-${Date.now()}`;
                 response.write('History cleared.');
                 response.end();
             } else if (inquiry.length > 0) {
@@ -674,9 +804,9 @@ const serve = async (port) => {
                     response.write(text);
                 }
                 const delegates = { stream };
-                const context = { inquiry, history, delegates };
+                const request = { inquiry, history, delegates, conversationId, metadata };
                 const start = Date.now();
-                const { answer } = await reply(context);
+                const { answer } = await reply(request);
                 console.log();
                 response.end();
                 const duration = Date.now() - start;
@@ -700,10 +830,10 @@ const canary = async () => {
 
     const inquiry = 'What is the capital of France?';
     const history = [];
-    const context = { inquiry, history };
+    const request = { inquiry, history };
     try {
-        const { answer } = await reply(context);
-        LLM_REASONING_ABILITY = answer.includes(THINK_START) && answer.includes(THINK_STOP);
+        const { answer, rawAnswer } = await reply(request);
+        LLM_REASONING_ABILITY = (rawAnswer || answer).includes(THINK_START) && (rawAnswer || answer).includes(THINK_STOP);
         console.log(`LLM is ${GREEN}ready${NORMAL} (working as expected).`);
         if (LLM_REASONING_ABILITY) {
             console.log(`This is a ${YELLOW}reasoning${NORMAL} model.`);
@@ -743,7 +873,8 @@ const canary = async () => {
         console.log(`  ./chat-llm.js context-stats               # Context statistics\n`);
         console.log(`${CYAN}Prompt Management:${NORMAL}`);
         console.log(`  ./chat-llm.js prompt-list                 # List all templates`);
-        console.log(`  ./chat-llm.js prompt-render <id>          # Render template\n`);
+        console.log(`  ./chat-llm.js prompt-render <id>          # Show template definition`);
+        console.log(`  ./chat-llm.js prompt-run <id> k=v ...     # Render template with variables\n`);
         console.log(`${CYAN}Task Management:${NORMAL}`);
         console.log(`  ./chat-llm.js task-list                   # List all tasks`);
         console.log(`  ./chat-llm.js task-stats                  # Task queue statistics\n`);
@@ -866,10 +997,10 @@ const canary = async () => {
         });
     } else if (args[0] === 'context-create' && args.length > 1) {
         const contextName = args[1];
-        const ctx = context.createContext(contextName);
+        const ctx = contextManager.createContext(contextName);
         console.log(`${GREEN}${CHECK}${NORMAL} Created context: ${BOLD}${contextName}${NORMAL}`);
     } else if (args[0] === 'context-list') {
-        const contexts = context.listContexts();
+        const contexts = contextManager.listContexts();
         if (contexts.length === 0) {
             console.log('No contexts found.');
         } else {
@@ -885,7 +1016,7 @@ const canary = async () => {
         }
     } else if (args[0] === 'context-activate' && args.length > 1) {
         const contextName = args[1];
-        const ctx = context.activateContext(contextName);
+        const ctx = contextManager.activateContext(contextName);
         if (ctx) {
             console.log(`${GREEN}${CHECK}${NORMAL} Activated context: ${BOLD}${contextName}${NORMAL}`);
         } else {
@@ -893,7 +1024,7 @@ const canary = async () => {
             process.exit(-1);
         }
     } else if (args[0] === 'context-stats') {
-        const stats = context.getStats();
+        const stats = contextManager.getStats();
         console.log('Context Statistics:');
         console.log(`  Total contexts: ${stats.totalContexts}`);
         console.log(`  Total size: ${stats.totalSize} bytes`);
@@ -917,6 +1048,27 @@ const canary = async () => {
             console.log(template.template);
         } else {
             console.error(`${RED}Template '${templateId}' not found${NORMAL}`);
+            process.exit(-1);
+        }
+    } else if (args[0] === 'prompt-run' && args.length > 1) {
+        const templateId = args[1];
+        const template = prompts.getTemplate(templateId);
+        if (!template) {
+            console.error(`${RED}Template '${templateId}' not found${NORMAL}`);
+            process.exit(-1);
+        }
+        const variables = args.slice(2).reduce((acc, pair) => {
+            const [key, ...rest] = pair.split('=');
+            if (key) {
+                acc[key] = rest.join('=');
+            }
+            return acc;
+        }, {});
+        const rendered = prompts.render(templateId, variables);
+        if (rendered) {
+            console.log(rendered);
+        } else {
+            console.error(`${RED}Failed to render template '${templateId}'${NORMAL}`);
             process.exit(-1);
         }
     } else if (args[0] === 'task-list') {

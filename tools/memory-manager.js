@@ -23,6 +23,7 @@ class MemoryManager {
     this.maxShortTermSize = 100;
     this.maxConversationHistory = 500;
     this.ensureStorage();
+    this.loadExistingConversations();
   }
 
   /**
@@ -31,6 +32,28 @@ class MemoryManager {
   ensureStorage() {
     if (!fs.existsSync(this.storageDir)) {
       fs.mkdirSync(this.storageDir, { recursive: true });
+    }
+  }
+
+  /**
+   * Load all existing conversations from disk
+   */
+  loadExistingConversations() {
+    try {
+      const files = fs.readdirSync(this.storageDir).filter(file => file.endsWith('.json'));
+      files.forEach(file => {
+        try {
+          const content = fs.readFileSync(path.join(this.storageDir, file), 'utf-8');
+          const conversation = JSON.parse(content);
+          if (conversation?.id) {
+            this.conversations.set(conversation.id, conversation);
+          }
+        } catch (e) {
+          console.error(`Failed to load conversation file ${file}:`, e.message);
+        }
+      });
+    } catch (e) {
+      // Ignore if storage dir is empty/missing
     }
   }
 
@@ -429,6 +452,26 @@ class MemoryManager {
       } catch (e) {
         console.error('Failed to clear disk storage:', e.message);
       }
+    }
+  }
+
+  /**
+   * Check if a conversation exists
+   * @param {string} conversationId
+   * @returns {boolean}
+   */
+  hasConversation(conversationId) {
+    return this.conversations.has(conversationId);
+  }
+
+  /**
+   * Ensure a conversation exists, creating it when missing
+   * @param {string} conversationId
+   * @param {Object} metadata
+   */
+  ensureConversation(conversationId, metadata = {}) {
+    if (!this.hasConversation(conversationId)) {
+      this.createConversation(conversationId, metadata);
     }
   }
 }
