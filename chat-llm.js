@@ -354,7 +354,7 @@ const reply = async (context) => {
         agent: activeAgent ? activeAgent.id : 'default',
         context: activeContext ? activeContext.name : null
     };
-    const sessionSource = (metadata && metadata.source) || 'cli';
+    const sessionSource = metadata?.source || 'cli';
     const operationStart = Date.now();
     
     // Request context for response metadata
