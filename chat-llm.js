@@ -308,6 +308,9 @@ const DEMO_RESPONSES = {
     'capital': ['Paris is the capital of France.', 'The capital of France is Paris.'],
     'weather': ['I cannot check the current weather, but you can check a weather service online.', 'Weather information is not available in demo mode.'],
     'time': ['I cannot provide real-time information in demo mode.', 'Time-based queries are not supported in demo mode.'],
+    'planet': ['Jupiter is the largest planet in our solar system.', 'The largest planet is Jupiter.'],
+    'smallest': ['Mercury is the smallest planet in our solar system.', 'The smallest planet is Mercury.'],
+    'hottest': ['Venus is the hottest planet in our solar system.', 'The hottest planet is Venus.'],
     'default': ['This is a demo response since the LLM API is unavailable.', 'I am in demo mode and cannot provide real responses.', 'Demo mode is active - API responses are simulated.']
 };
 
@@ -328,6 +331,12 @@ const demoReply = async (inquiry) => {
         return DEMO_RESPONSES.weather[Math.floor(Math.random() * DEMO_RESPONSES.weather.length)];
     } else if (lowerInquiry.includes('time') || lowerInquiry.includes('hour') || lowerInquiry.includes('clock')) {
         return DEMO_RESPONSES.time[Math.floor(Math.random() * DEMO_RESPONSES.time.length)];
+    } else if (lowerInquiry.includes('largest') && lowerInquiry.includes('planet')) {
+        return DEMO_RESPONSES.planet[Math.floor(Math.random() * DEMO_RESPONSES.planet.length)];
+    } else if (lowerInquiry.includes('smallest') && lowerInquiry.includes('planet')) {
+        return DEMO_RESPONSES.smallest[Math.floor(Math.random() * DEMO_RESPONSES.smallest.length)];
+    } else if (lowerInquiry.includes('hottest') && lowerInquiry.includes('planet')) {
+        return DEMO_RESPONSES.hottest[Math.floor(Math.random() * DEMO_RESPONSES.hottest.length)];
     }
     
     return DEMO_RESPONSES.default[Math.floor(Math.random() * DEMO_RESPONSES.default.length)];
