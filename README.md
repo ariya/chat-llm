@@ -220,3 +220,94 @@ Assuming the above content is in `qa.txt`, executing the following command will 
 ```
 
 For additional examples, please refer to the `tests/` subdirectory.
+
+## v2 Advanced Features
+
+### Configuration Management
+
+Chat LLM v2 includes a comprehensive configuration system for managing application settings and profiles:
+
+```bash
+# Get configuration values
+./chat-llm.js config-get models.temperature
+./chat-llm.js config-get caching.enabled
+
+# Set configuration values
+./chat-llm.js config-set models.temperature 0.8
+./chat-llm.js config-set caching.ttl 3600000
+
+# List available profiles
+./chat-llm.js config-list
+```
+
+Default configuration includes:
+- Model settings (temperature, max tokens)
+- Caching behavior (TTL: 24 hours)
+- Logging configuration
+- API timeout and retry settings
+
+### Response Caching
+
+Intelligent response caching reduces API calls and improves performance:
+
+```bash
+# View cache statistics
+./chat-llm.js cache-stats
+
+# Clear cache
+./chat-llm.js cache-clear
+```
+
+The cache automatically stores responses with a 24-hour TTL and can be enabled/disabled via configuration.
+
+### Request Logging & Analytics
+
+All requests are logged automatically for monitoring and debugging:
+
+```bash
+# View statistics
+./chat-llm.js stats
+
+# Export logs
+./chat-llm.js export json > logs.json
+./chat-llm.js export csv > logs.csv
+```
+
+Logs include:
+- Request timestamps
+- Operation types
+- Response times
+- Request/response content (truncated)
+
+### Sentiment Analysis
+
+Built-in sentiment analysis for understanding user input and conversation tone:
+
+```bash
+./chat-llm.js sentiment "This is amazing!"
+```
+
+Returns sentiment classification (positive, negative, neutral) with scores.
+
+### Demo Mode
+
+Test the UI and features without API credentials:
+
+```bash
+LLM_DEMO_MODE=1 HTTP_PORT=5000 ./chat-llm.js
+```
+
+Demo mode simulates intelligent responses for testing and development.
+
+## Architecture
+
+Chat LLM v2 is built with the following components:
+
+- **Core**: Zero-dependency chat interface
+- **Cache**: Automatic response caching (memory + disk)
+- **Config**: Settings and profile management
+- **Logger**: Request tracking and analytics
+- **Monitor**: Performance metrics collection
+- **Tools**: Sentiment analysis and utilities
+
+All components are optional and can be disabled via configuration for minimal resource usage.
