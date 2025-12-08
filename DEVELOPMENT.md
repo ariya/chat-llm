@@ -530,9 +530,36 @@ All new code follows consistent patterns:
 ./chat-llm.js --help
 ```
 
+### CI/CD Workflow Changes (December 8, 2025)
+
+#### Uncommitted Changes Detection
+- Added automated checks in GitHub Actions workflows to detect uncommitted changes after test runs
+- Ensures that running tests doesn't accidentally create files that should be committed or ignored
+- Implemented in:
+  - `test-small-llm.yml` - All test jobs check for uncommitted changes
+  - `sandbox.yml` - All test jobs check for uncommitted changes
+
+**How it works:**
+```bash
+# After running tests, the workflow checks:
+git status --porcelain
+
+# If any uncommitted changes are found, the workflow fails with:
+# "Error: Uncommitted changes detected after running tests"
+```
+
+**Why this is important:**
+- Prevents accidental file creation during tests
+- Catches issues where tests generate files that aren't properly ignored
+- Ensures `.gitignore` is configured correctly (e.g., `logs/` directory)
+- Maintains repository cleanliness in CI/CD pipelines
+
+**Note:** The `logs/` directory created by the request logger is already properly ignored via `.gitignore`, so tests run successfully without triggering this check.
+
 ### Status
 ✅ All features tested and working
 ✅ Code committed and pushed to v1-release branch
 ✅ Documentation updated
+✅ Uncommitted changes detection added to CI/CD workflows
 ✅ Ready for production use or further development
 
