@@ -85,7 +85,18 @@ const chat = async (messages, handler = null, attempt = MAX_RETRY_ATTEMPT) => {
             signal: AbortSignal.timeout(timeout * 1000)
         });
         if (!response.ok) {
-            throw new Error(`HTTP error with the status: ${response.status} ${response.statusText}`);
+            const status = response.status;
+            const statusText = response.statusText;
+            
+            // Handle rate limiting with exponential backoff
+            if (status === 429 && attempt > 1) {
+                const waitTime = (MAX_RETRY_ATTEMPT - attempt + 2) * 5000; // 5s, 10s, 15s
+                LLM_DEBUG && console.log(`Rate limited (429). Waiting ${waitTime}ms before retry...`);
+                await sleep(waitTime);
+                return await chat(messages, handler, attempt - 1);
+            }
+            
+            throw new Error(`HTTP error with the status: ${status} ${statusText}`);
         }
 
         const extract = (data) => {
@@ -213,6 +224,28 @@ console.log(analyzeSentiment("text to analyze"));
 Your answer should be a sentence or two, unless the user's request requires long-form outputs.
 Never use emojis. Never use markdown. Always answer in plain text and  in the same language as the query.`;
 
+const DEMO_RESPONSES = {
+    'capital': ['Paris is the capital of France.', 'The capital of France is Paris.'],
+    'weather': ['I cannot check the current weather, but you can check a weather service online.', 'Weather information is not available in demo mode.'],
+    'time': ['I cannot provide real-time information in demo mode.', 'Time-based queries are not supported in demo mode.'],
+    'default': ['This is a demo response since the LLM API is unavailable.', 'I am in demo mode and cannot provide real responses.', 'Demo mode is active - API responses are simulated.']
+};
+
+const demoReply = async (inquiry) => {
+    // Simple pattern matching for demo responses
+    const lowerInquiry = inquiry.toLowerCase();
+    
+    if (lowerInquiry.includes('capital') || lowerInquiry.includes('france') || lowerInquiry.includes('paris')) {
+        return DEMO_RESPONSES.capital[Math.floor(Math.random() * DEMO_RESPONSES.capital.length)];
+    } else if (lowerInquiry.includes('weather') || lowerInquiry.includes('rain') || lowerInquiry.includes('temperature')) {
+        return DEMO_RESPONSES.weather[Math.floor(Math.random() * DEMO_RESPONSES.weather.length)];
+    } else if (lowerInquiry.includes('time') || lowerInquiry.includes('hour') || lowerInquiry.includes('clock')) {
+        return DEMO_RESPONSES.time[Math.floor(Math.random() * DEMO_RESPONSES.time.length)];
+    }
+    
+    return DEMO_RESPONSES.default[Math.floor(Math.random() * DEMO_RESPONSES.default.length)];
+};
+
 const reply = async (context) => {
     const { inquiry, history, delegates } = context;
     const { stream } = delegates || {};
@@ -227,7 +260,17 @@ const reply = async (context) => {
     });
 
     messages.push({ role: 'user', content: inquiry });
-    let rawAnswer = await chat(messages, stream);
+    
+    let rawAnswer;
+    try {
+        rawAnswer = await chat(messages, stream);
+    } catch (error) {
+        if (process.env.LLM_DEMO_MODE) {
+            rawAnswer = await demoReply(inquiry);
+        } else {
+            throw error;
+        }
+    }
 
     const THINK_START_TAG = '<think>';
     const THINK_STOP_TAG = '</think>';
@@ -236,6 +279,7 @@ const reply = async (context) => {
 
     const thinkStartIndex = rawAnswer.indexOf(THINK_START_TAG);
     const thinkStopIndex = rawAnswer.indexOf(THINK_STOP_TAG);
+
 
     if (thinkStartIndex !== -1 && thinkStopIndex !== -1) {
         const thinkContent = rawAnswer.substring(thinkStartIndex + THINK_START_TAG.length, thinkStopIndex);
@@ -591,6 +635,11 @@ const canary = async () => {
         }
         console.log();
     } catch (error) {
+        if (process.env.LLM_DEMO_MODE) {
+            console.log(`${YELLOW}⚠${NORMAL}  LLM unavailable - running in ${CYAN}demo mode${NORMAL}.`);
+            console.log('   (Responses will be simulated for testing purposes)\n');
+            return;
+        }
         console.error(`${CROSS} ${RED}Fatal error: LLM is not ready!${NORMAL}`);
         console.error(error);
         process.exit(-1);
@@ -598,16 +647,22 @@ const canary = async () => {
 };
 
 (async () => {
-    await canary();
-
     const args = process.argv.slice(2);
-    args.forEach(evaluate);
-    if (args.length == 0) {
-        const port = parseInt(process.env.HTTP_PORT, 10);
-        if (!Number.isNaN(port) && port > 0 && port < 65536) {
-            await serve(port);
+    if (args[0] === 'sentiment' && args.length > 1) {
+        const textToAnalyze = args.slice(1).join(' ');
+        const result = analyzeSentiment(textToAnalyze);
+        console.log(JSON.stringify(result, null, 2));
+    } else {
+        await canary(); // Only run canary if not directly testing sentiment
+        if (args.length > 0) {
+            args.forEach(evaluate);
         } else {
-            await interact();
+            const port = parseInt(process.env.HTTP_PORT, 10);
+            if (!Number.isNaN(port) && port > 0 && port < 65536) {
+                await serve(port);
+            } else {
+                await interact();
+            }
         }
     }
 })();
