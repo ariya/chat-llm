@@ -284,10 +284,15 @@ class ResponseCache {
      * @returns {string} Formatted string (e.g., "1.5 MB")
      */
     formatBytes(bytes) {
-        if (bytes === 0) return '0 Bytes';
+        // Input validation
+        if (typeof bytes !== 'number' || bytes < 0) {
+            return '0 B';
+        }
+        
+        if (bytes === 0) return '0 B';
         
         const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const sizes = ['B', 'KB', 'MB', 'GB'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         
         return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];

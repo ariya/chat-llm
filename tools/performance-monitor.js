@@ -228,6 +228,11 @@ class PerformanceMonitor {
      * @returns {string} Formatted string
      */
     formatBytes(bytes) {
+        // Input validation
+        if (typeof bytes !== 'number' || bytes < 0) {
+            return '0 B';
+        }
+        
         if (bytes === 0) return '0 B';
         
         const k = 1024;
