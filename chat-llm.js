@@ -692,7 +692,26 @@ const canary = async () => {
 
 (async () => {
     const args = process.argv.slice(2);
-    if (args[0] === 'sentiment' && args.length > 1) {
+    
+    if (args.length === 0 || args[0] === '--help' || args[0] === '-h' || args[0] === 'help') {
+        console.log(`${BOLD}Chat LLM${NORMAL} - Zero-dependency LLM chat tool\n`);
+        console.log(`${CYAN}Usage:${NORMAL}`);
+        console.log(`  ./chat-llm.js                              # Interactive mode`);
+        console.log(`  ./chat-llm.js <test-file>                 # Run test file`);
+        console.log(`  ./chat-llm.js sentiment <text>            # Analyze sentiment`);
+        console.log(`  ./chat-llm.js stats                       # Show request statistics`);
+        console.log(`  ./chat-llm.js export <format>             # Export logs (json|csv)`);
+        console.log(`  HTTP_PORT=5000 ./chat-llm.js              # Web interface\n`);
+        console.log(`${CYAN}Environment Variables:${NORMAL}`);
+        console.log(`  LLM_API_BASE_URL         # API endpoint (default: OpenAI)`);
+        console.log(`  LLM_API_KEY              # API authentication key`);
+        console.log(`  LLM_CHAT_MODEL           # Model name to use`);
+        console.log(`  LLM_STREAMING            # Enable streaming (default: yes)`);
+        console.log(`  LLM_FORCE_REASONING      # Use reasoning mode`);
+        console.log(`  LLM_DEMO_MODE            # Run in demo mode`);
+        console.log(`  HTTP_PORT                # Enable web server on port\n`);
+        process.exit(0);
+    } else if (args[0] === 'sentiment' && args.length > 1) {
         const textToAnalyze = args.slice(1).join(' ');
         const start = Date.now();
         const result = analyzeSentiment(textToAnalyze);
