@@ -1,13 +1,14 @@
 # Chat LLM Development Summary
 
-## Version 2 Overview - Swiss Army Knife LLM Agent
+## Version 2.1 Overview - Robust Swiss Army Knife LLM Agent
 
-Chat LLM v2 is a comprehensive, multi-purpose LLM agent platform that acts as a "Swiss Army Knife" for AI-powered tasks. It provides sophisticated orchestration, context management, memory systems, and task automation capabilities.
+Chat LLM v2.1 is a comprehensive, production-ready LLM agent platform that acts as a "Swiss Army Knife" for AI-powered tasks. It provides sophisticated orchestration, context management, memory systems, task automation, and advanced error handling with robust plugin architecture and event-driven design.
 
 ### Core Architecture
 
-The application is built on modular, composable systems:
+The application is built on modular, composable systems across multiple layers:
 
+**Foundation Layer:**
 1. **Agent Manager** - Multi-purpose agent orchestration
 2. **Context Manager** - Custom data and knowledge management
 3. **Prompt Manager** - Advanced prompt templating
@@ -17,9 +18,121 @@ The application is built on modular, composable systems:
 7. **Response Cache** - Performance optimization
 8. **Config Manager** - Settings and profiles
 
-## December 8, 2025 - Major v2 Enhancement
+**Advanced Layer (v2.1):**
+9. **Workflow Manager** - Complex multi-step workflows with branching
+10. **Error Handler** - Robust error handling and recovery
+11. **Plugin Manager** - Dynamic plugin system for extensibility
+12. **Event Bus Manager** - Decoupled event-driven architecture
 
-### New Systems Implemented
+## December 8, 2025 - Advanced v2.1 Enhancement
+
+### New Robust Systems Implemented
+
+#### 1. **Workflow Manager** (`tools/workflow-manager.js`)
+Advanced workflow orchestration with complex multi-step execution, branching logic, and error handling.
+
+**Key Features:**
+- Multi-step workflow definition with dependencies
+- Step-level timeout and retry configuration
+- Conditional step execution based on context
+- Three error handling strategies: fallback, retry, escalate
+- Workflow hooks (start, complete, error)
+- Execution history and statistics
+- Step dependency resolution
+- Execution cancellation
+
+**Built-in Workflows:**
+- **Research & Report** - Gather information, analyze data, write report
+- **Code Development** - Design, implement, test, document
+- **Support Escalation** - Tiered support with escalation path
+
+**Usage:**
+```bash
+./chat-llm.js workflow-list              # List all workflows
+./chat-llm.js workflow-execute <id>      # Execute workflow
+./chat-llm.js workflow-stats <id>        # Workflow statistics
+./chat-llm.js workflow-history <id>      # Execution history
+```
+
+#### 2. **Error Handler & Recovery Manager** (`tools/error-handler.js`)
+Robust error handling with circuit breaker pattern, automatic retries, and recovery strategies.
+
+**Recovery Strategies:**
+- **Exponential Backoff** - Exponential delay with jitter between retries
+- **Linear Backoff** - Linear increase in delay between retries
+- **Fallback** - Execute fallback function on error
+- **Timeout** - Enforce timeout limits with race conditions
+- **Circuit Breaker** - Prevent cascading failures
+
+**Circuit Breaker States:**
+- **Closed** - Normal operation, requests proceed
+- **Open** - Requests rejected, service recovering
+- **Half-Open** - Limited requests to test recovery
+
+**Features:**
+- Automatic strategy selection based on error type
+- Error logging and analytics
+- Circuit breaker per service
+- Comprehensive error statistics
+- Error pattern detection
+
+**Usage:**
+```bash
+./chat-llm.js error-stats                # Error statistics
+./chat-llm.js error-log [limit]          # View error log
+./chat-llm.js circuit-status             # Circuit breaker status
+```
+
+#### 3. **Plugin Manager** (`tools/plugin-manager.js`)
+Dynamic plugin system for extending functionality without modifying core.
+
+**Plugin Lifecycle:**
+- Register plugins with metadata and capabilities
+- Enable/disable plugins at runtime
+- Plugin hooks and middleware support
+- Plugin configuration management
+- Plugin execution statistics
+
+**Usage:**
+```bash
+./chat-llm.js plugin-list                # List all plugins
+./chat-llm.js plugin-enable <name>       # Enable plugin
+./chat-llm.js plugin-disable <name>      # Disable plugin
+./chat-llm.js plugin-stats               # Plugin statistics
+```
+
+#### 4. **Event Bus Manager** (`tools/event-bus.js`)
+Decoupled event-driven architecture with pub/sub messaging and event persistence.
+
+**Features:**
+- Pattern-based event subscription with wildcards
+- Priority-based handler execution
+- One-time subscriptions
+- Event filtering with custom predicates
+- Timeout on handlers
+- Dead letter queue for failed events
+- Event history persistence
+- Batch event emission
+- Async/await style event waiting
+
+**Pattern Matching Examples:**
+```javascript
+'user:login'          // Exact match
+'user:*'              // Wildcard: matches user:login, user:logout
+'event:*:error'       // Matches event:api:error, event:db:error
+'*'                   // Matches all events
+```
+
+**Usage:**
+```bash
+./chat-llm.js event-history [type]       # Event history
+./chat-llm.js event-stats                # Event statistics
+./chat-llm.js event-dlq                  # Dead letter queue
+```
+
+---
+
+## v2.0 - Foundation Systems (Original)
 
 #### 1. **Agent Manager** (`tools/agent-manager.js`)
 Complete multi-purpose agent orchestration system for delegating tasks to specialized agents.

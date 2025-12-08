@@ -12,6 +12,10 @@ const { ContextManager } = require('./tools/context-manager');
 const { PromptManager } = require('./tools/prompt-manager');
 const { MemoryManager } = require('./tools/memory-manager');
 const { TaskManager } = require('./tools/task-manager');
+const { WorkflowManager } = require('./tools/workflow-manager');
+const { ErrorHandler } = require('./tools/error-handler');
+const { PluginManager } = require('./tools/plugin-manager');
+const { EventBusManager } = require('./tools/event-bus');
 
 const LLM_API_BASE_URL = process.env.LLM_API_BASE_URL || 'https://api.openai.com/v1';
 const LLM_API_KEY = process.env.LLM_API_KEY || process.env.OPENAI_API_KEY;
@@ -53,6 +57,10 @@ const context = new ContextManager('./context-data');
 const prompts = new PromptManager();
 const memory = new MemoryManager('./memory');
 const tasks = new TaskManager();
+const workflows = new WorkflowManager();
+const errorHandler = new ErrorHandler();
+const plugins = new PluginManager();
+const eventBus = new EventBusManager();
 
 /**
  * Suspends the execution for a specified amount of time.
