@@ -344,7 +344,7 @@ const demoReply = async (inquiry) => {
  * @returns {Promise<Object>} Response object containing the answer and updated context
  */
 const reply = async (context) => {
-    const { inquiry, history, delegates } = context;
+    const { inquiry, history, delegates, metadata, conversationId } = context;
     const { stream } = delegates || {};
     const cacheEnabled = config.get('caching.enabled', true);
     const activeAgent = agents.getActiveAgent();
@@ -354,8 +354,16 @@ const reply = async (context) => {
         agent: activeAgent ? activeAgent.id : 'default',
         context: activeContext ? activeContext.name : null
     };
-    const sessionSource = metadata.source || 'cli';
+    const sessionSource = (metadata && metadata.source) || 'cli';
     const operationStart = Date.now();
+    
+    // Request context for response metadata
+    const requestContext = {
+        conversationId,
+        agent: logMetadata.agent,
+        context: logMetadata.context,
+        source: sessionSource
+    };
 
     const recordMemory = (role, content, extra = {}) => {
         if (!conversationId) {

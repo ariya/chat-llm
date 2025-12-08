@@ -21,8 +21,9 @@ class ResponseCache {
      * Initialize the response cache
      * 
      * @param {string} cacheDir - Directory to store cached responses
+     * @param {number} ttl - Time to live in milliseconds (default: 24 hours)
      */
-    constructor(cacheDir = './cache') {
+    constructor(cacheDir = './cache', ttl = 24 * 60 * 60 * 1000) {
         this.cacheDir = cacheDir;
         this.ttl = ttl;
         this.memoryCache = new Map();
