@@ -3,6 +3,7 @@
 const fs = require('fs');
 const http = require('http');
 const readline = require('readline');
+const { analyzeSentiment } = require('./tools/sentiment_analyzer');
 
 const LLM_API_BASE_URL = process.env.LLM_API_BASE_URL || 'https://api.openai.com/v1';
 const LLM_API_KEY = process.env.LLM_API_KEY || process.env.OPENAI_API_KEY;
@@ -192,6 +193,9 @@ Never use emojis. Never use markdown. Always answer in plain text.`;
 
 const REPLY_THINK = `You are a helpful AI assistant. You are chatting with a human user.
 
+You have access to the following tools:
+- analyzeSentiment(text: string): Analyzes the sentiment of the given text. Returns an object with 'sentiment' (positive, negative, neutral) and 'score'.
+
 You should first draft your thinking process (inner monologue) until you have derived the final answer.
 Write both your thoughts and answer in the same language as the task posed by the user.
 
@@ -200,6 +204,10 @@ Your thinking process must follow the template below:
 <think>
 Your thoughts or/and draft, like working through an exercise on scratch paper.
 Be as casual and as long as you want until you are confident to generate a correct answer.
+If you need to use a tool, use the following format:
+<tool_code>
+console.log(analyzeSentiment("text to analyze"));
+</tool_code>
 </think>
 
 Your answer should be a sentence or two, unless the user's request requires long-form outputs.
@@ -219,9 +227,44 @@ const reply = async (context) => {
     });
 
     messages.push({ role: 'user', content: inquiry });
-    const answer = await chat(messages, stream);
+    let rawAnswer = await chat(messages, stream);
 
-    return { answer, ...context };
+    const THINK_START_TAG = '<think>';
+    const THINK_STOP_TAG = '</think>';
+    const TOOL_CODE_START_TAG = '<tool_code>';
+    const TOOL_CODE_STOP_TAG = '</tool_code>';
+
+    const thinkStartIndex = rawAnswer.indexOf(THINK_START_TAG);
+    const thinkStopIndex = rawAnswer.indexOf(THINK_STOP_TAG);
+
+    if (thinkStartIndex !== -1 && thinkStopIndex !== -1) {
+        const thinkContent = rawAnswer.substring(thinkStartIndex + THINK_START_TAG.length, thinkStopIndex);
+        const toolCodeStartIndex = thinkContent.indexOf(TOOL_CODE_START_TAG);
+        const toolCodeStopIndex = thinkContent.indexOf(TOOL_CODE_STOP_TAG);
+
+        if (toolCodeStartIndex !== -1 && toolCodeStopIndex !== -1) {
+            const toolCode = thinkContent.substring(toolCodeStartIndex + TOOL_CODE_START_TAG.length, toolCodeStopIndex);
+            let toolOutput = '';
+            try {
+                // Execute the tool code in a sandboxed environment
+                // For simplicity, using eval here. In a real-world scenario, consider a more secure sandbox.
+                const consoleLog = (output) => { toolOutput += JSON.stringify(output) + '\n'; };
+                const context = { analyzeSentiment, console: { log: consoleLog } };
+                const script = new Function('analyzeSentiment', 'console', toolCode);
+                script(context.analyzeSentiment, context.console);
+            } catch (e) {
+                toolOutput = `Error executing tool: ${e.message}`;
+            }
+
+            // Re-prompt the LLM with the tool output
+            messages.push({ role: 'assistant', content: rawAnswer }); // Add the LLM's initial thought process
+            messages.push({ role: 'system', content: `Tool output:\n${toolOutput}` });
+            messages.push({ role: 'user', content: 'Given the tool output, provide your final answer.' });
+            rawAnswer = await chat(messages, stream);
+        }
+    }
+
+    return { answer: rawAnswer, ...context };
 }
 
 /**
