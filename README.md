@@ -1,10 +1,14 @@
 # Chat LLM
 
-**Chat LLM** is a simple, zero-dependency tool to chat with an LLM (large language model). It works seamlessly with both cloud-based LLM services (e.g., [OpenAI GPT](https://platform.openai.com/docs), [Groq](https://groq.com), [OpenRouter](https://openrouter.ai)) and locally hosted LLMs (e.g. [llama.cpp](https://github.com/ggerganov/llama.cpp), [LM Studio](https://lmstudio.ai), [Ollama](https://ollama.com)).
+**Chat LLM** is a Swiss Army Knife for LLM-powered tasks. It's a simple, zero-dependency tool to chat with an LLM (large language model) that provides advanced features like agent orchestration, context management, memory systems, and task automation.
+
+It works seamlessly with both cloud-based LLM services (e.g., [OpenAI GPT](https://platform.openai.com/docs), [Groq](https://groq.com), [OpenRouter](https://openrouter.ai)) and locally hosted LLMs (e.g. [llama.cpp](https://github.com/ggerganov/llama.cpp), [LM Studio](https://lmstudio.ai), [Ollama](https://ollama.com)).
 
 Chat LLM is accessible via the terminal or through its minimalist web interface.
 
 <img src="chat-llm.png" alt="Chat LLM" width="50%" height="50%"/>
+
+## Quick Start
 
 To run Chat LLM, ensure that [Node.js](https://nodejs.org) (v18 or higher) or [Bun](https://bun.sh) is installed.
 
@@ -29,6 +33,70 @@ HTTP_PORT=5000 ./chat-llm.js
 ```
 
 Then, open a web browser and go to `localhost:5000`.
+
+## v2 Features - Swiss Army Knife for AI
+
+Chat LLM v2 introduces powerful multi-purpose agent capabilities:
+
+### Agent Orchestration
+Specialized agents for different tasks:
+- **Researcher** - Information gathering and synthesis
+- **Coder** - Programming and debugging
+- **Writer** - Content creation and editing
+- **Analyst** - Data analysis and insights
+- **Tutor** - Educational explanations
+- **Solver** - Problem-solving methodology
+- **Support** - Customer service
+
+```bash
+./chat-llm.js agent-list              # View all agents
+./chat-llm.js agent-activate coder    # Activate agent
+./chat-llm.js agent-stats             # View statistics
+```
+
+### Context Management
+Work with custom data and knowledge bases:
+
+```bash
+./chat-llm.js context-create research      # Create context
+./chat-llm.js context-list                 # List contexts
+./chat-llm.js context-activate research    # Activate context
+```
+
+### Advanced Prompt Templates
+Pre-built templates for common tasks with variable substitution and conditionals:
+
+```bash
+./chat-llm.js prompt-list      # View templates
+./chat-llm.js prompt-render analysis  # Display template
+```
+
+### Intelligent Memory
+Persistent conversation memory with automatic summarization:
+
+```bash
+./chat-llm.js memory-list      # List conversations
+./chat-llm.js memory-stats     # Memory usage
+```
+
+### Task & Workflow Management
+Queue tasks, manage workflows, and batch process:
+
+```bash
+./chat-llm.js task-list        # View tasks
+./chat-llm.js task-stats       # Queue statistics
+```
+
+### Analysis & Logging
+Built-in sentiment analysis, request logging, and statistics:
+
+```bash
+./chat-llm.js sentiment "text"  # Analyze sentiment
+./chat-llm.js stats             # Request statistics
+./chat-llm.js export json       # Export logs
+```
+
+For detailed v2 features and examples, see [QUICK_START.md](QUICK_START.md) and [DEVELOPMENT.md](DEVELOPMENT.md).
 
 ## Response Caching & Configuration
 
