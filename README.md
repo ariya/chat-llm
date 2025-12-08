@@ -206,3 +206,37 @@ Assuming the above content is in `qa.txt`, executing the following command will 
 ```
 
 For additional examples, please refer to the `tests/` subdirectory.
+
+## Sentiment Analysis
+
+Chat LLM includes a built-in sentiment analyzer tool that can be used to analyze the emotional tone of text. This feature is particularly useful for processing user input or monitoring conversation sentiment.
+
+To analyze sentiment:
+```bash
+./chat-llm.js sentiment "This is excellent and amazing!"
+```
+
+Output:
+```json
+{
+  "sentiment": "positive",
+  "score": 2
+}
+```
+
+The sentiment analyzer identifies positive, negative, and neutral sentiments and provides a numerical score.
+
+## Demo Mode
+
+When the LLM API is unavailable or during development, you can run Chat LLM in demo mode. This mode simulates responses without requiring a valid API connection:
+
+```bash
+LLM_DEMO_MODE=1 HTTP_PORT=5000 ./chat-llm.js
+```
+
+Demo mode is useful for:
+- Testing the user interface without API credentials
+- Development and prototyping
+- Educational demonstrations
+
+Note: Demo responses are simulated and may not be fully accurate for all queries.
