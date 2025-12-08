@@ -30,6 +30,20 @@ HTTP_PORT=5000 ./chat-llm.js
 
 Then, open a web browser and go to `localhost:5000`.
 
+## Response Caching & Configuration
+
+Chat LLM automatically caches responses for 24 hours to avoid repeated calls to your LLM API. Cached results live in `./cache` and are reused instantly in the terminal and web UI. This keeps latency low and saves API credits when you revisit the same prompt during a debugging or evaluation session.
+
+```bash
+./chat-llm.js cache-stats         # Inspect memory/disk cache usage
+./chat-llm.js cache-clear         # Purge all cached responses
+./chat-llm.js config-get caching.enabled
+./chat-llm.js config-set caching.enabled false   # Disable caching
+./chat-llm.js config-set caching.enabled true    # Re-enable caching
+```
+
+When caching is disabled via the config command, Chat LLM immediately falls back to live responses without touching the cache. Re-enabling restores the 24-hour TTL without restarting the app.
+
 ## Multi-language Support
 
 Chat LLM is capable of conversing in multiple languages beyond English. It consistently responds in the same language as the question posed. Additionally, it supports seamless language switching between queries, as illustrated in the following example:

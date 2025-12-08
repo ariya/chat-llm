@@ -5,6 +5,8 @@ const http = require('http');
 const readline = require('readline');
 const { analyzeSentiment } = require('./tools/sentiment_analyzer');
 const { RequestLogger } = require('./tools/request-logger');
+const { ResponseCache } = require('./tools/response-cache');
+const { ConfigManager } = require('./tools/config-manager');
 
 const LLM_API_BASE_URL = process.env.LLM_API_BASE_URL || 'https://api.openai.com/v1';
 const LLM_API_KEY = process.env.LLM_API_KEY || process.env.OPENAI_API_KEY;
@@ -37,6 +39,11 @@ const ARROW = '⇢';
 const CHECK = '✓';
 const CROSS = '✘';
 
+// Initialize v2 managers
+const cache = new ResponseCache('./cache');
+const config = new ConfigManager('./config');
+const logger = new RequestLogger('./logs');
+
 /**
  * Suspends the execution for a specified amount of time.
  *
@@ -46,8 +53,6 @@ const CROSS = '✘';
 const sleep = async (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const MAX_RETRY_ATTEMPT = 3;
-const logger = new RequestLogger('./logs');
-
 
 
 /**
@@ -287,6 +292,18 @@ const reply = async (context) => {
     const { inquiry, history, delegates } = context;
     const { stream } = delegates || {};
 
+    // Check cache first if caching is enabled
+    let cacheEnabled = config.get('caching.enabled', true);
+    let cachedResponse = cacheEnabled ? cache.get(inquiry) : null;
+    
+    if (cachedResponse) {
+        if (typeof stream === 'function') {
+            stream(cachedResponse);
+        }
+        logger.logRequest('reply', inquiry, cachedResponse, 0, { cached: true });
+        return { answer: cachedResponse, ...context };
+    }
+
     const messages = [];
     messages.push({ role: 'system', content: LLM_FORCE_REASONING ? REPLY_THINK : REPLY_PROMPT });
     const relevant = history.slice(-5);
@@ -307,7 +324,10 @@ const reply = async (context) => {
     
     let rawAnswer;
     try {
+        const start = Date.now();
         rawAnswer = await chat(messages, stream, MAX_RETRY_ATTEMPT, selectedModel);
+        const duration = Date.now() - start;
+        logger.logRequest('reply', inquiry, rawAnswer.substring(0, 100), duration);
     } catch (error) {
         if (process.env.LLM_DEMO_MODE) {
             rawAnswer = await demoReply(inquiry);
@@ -350,6 +370,10 @@ const reply = async (context) => {
             messages.push({ role: 'user', content: 'Given the tool output, provide your final answer.' });
             rawAnswer = await chat(messages, stream);
         }
+    }
+
+    if (cacheEnabled && rawAnswer && rawAnswer.length > 0) {
+        cache.set(inquiry, rawAnswer);
     }
 
     return { answer: rawAnswer, ...context };
@@ -694,13 +718,18 @@ const canary = async () => {
     const args = process.argv.slice(2);
     
     if (args.length === 0 || args[0] === '--help' || args[0] === '-h' || args[0] === 'help') {
-        console.log(`${BOLD}Chat LLM${NORMAL} - Zero-dependency LLM chat tool\n`);
+        console.log(`${BOLD}Chat LLM v2${NORMAL} - Advanced LLM chat tool with caching & config\n`);
         console.log(`${CYAN}Usage:${NORMAL}`);
         console.log(`  ./chat-llm.js                              # Interactive mode`);
         console.log(`  ./chat-llm.js <test-file>                 # Run test file`);
         console.log(`  ./chat-llm.js sentiment <text>            # Analyze sentiment`);
         console.log(`  ./chat-llm.js stats                       # Show request statistics`);
         console.log(`  ./chat-llm.js export <format>             # Export logs (json|csv)`);
+        console.log(`  ./chat-llm.js cache-stats                 # Show cache statistics`);
+        console.log(`  ./chat-llm.js cache-clear                 # Clear response cache`);
+        console.log(`  ./chat-llm.js config-get <key>            # Get config value`);
+        console.log(`  ./chat-llm.js config-set <key> <value>    # Set config value`);
+        console.log(`  ./chat-llm.js config-list                 # List all profiles`);
         console.log(`  HTTP_PORT=5000 ./chat-llm.js              # Web interface\n`);
         console.log(`${CYAN}Environment Variables:${NORMAL}`);
         console.log(`  LLM_API_BASE_URL         # API endpoint (default: OpenAI)`);
@@ -710,6 +739,12 @@ const canary = async () => {
         console.log(`  LLM_FORCE_REASONING      # Use reasoning mode`);
         console.log(`  LLM_DEMO_MODE            # Run in demo mode`);
         console.log(`  HTTP_PORT                # Enable web server on port\n`);
+        console.log(`${CYAN}v2 Features:${NORMAL}`);
+        console.log(`  - Response caching (24h TTL)`);
+        console.log(`  - Configuration management`);
+        console.log(`  - Request logging & analytics`);
+        console.log(`  - Sentiment analysis`);
+        console.log(`  - Profile management\n`);
         process.exit(0);
     } else if (args[0] === 'sentiment' && args.length > 1) {
         const textToAnalyze = args.slice(1).join(' ');
@@ -734,6 +769,32 @@ const canary = async () => {
         } else {
             console.error('Unsupported format. Use: json or csv');
             process.exit(-1);
+        }
+    } else if (args[0] === 'cache-stats') {
+        const cacheStats = cache.getStats();
+        console.log(JSON.stringify(cacheStats, null, 2));
+    } else if (args[0] === 'cache-clear') {
+        cache.clear();
+        console.log('Cache cleared successfully.');
+    } else if (args[0] === 'config-get' && args.length > 1) {
+        const value = config.get(args[1]);
+        console.log(JSON.stringify(value, null, 2));
+    } else if (args[0] === 'config-set' && args.length > 2) {
+        try {
+            const value = JSON.parse(args[2]);
+            config.set(args[1], value);
+            console.log(`Configuration updated: ${args[1]} = ${JSON.stringify(value)}`);
+        } catch (e) {
+            config.set(args[1], args[2]);
+            console.log(`Configuration updated: ${args[1]} = ${args[2]}`);
+        }
+    } else if (args[0] === 'config-list') {
+        const profiles = config.listProfiles();
+        console.log('Available profiles:');
+        if (profiles.length === 0) {
+            console.log('  No profiles found.');
+        } else {
+            profiles.forEach(p => console.log(`  - ${p}`));
         }
     } else {
         await canary(); // Only run canary if not directly testing sentiment
