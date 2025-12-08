@@ -311,6 +311,13 @@ const DEMO_RESPONSES = {
     'default': ['This is a demo response since the LLM API is unavailable.', 'I am in demo mode and cannot provide real responses.', 'Demo mode is active - API responses are simulated.']
 };
 
+/**
+ * Generates a simulated demo response for testing without API access.
+ * Uses simple pattern matching to provide contextually appropriate responses.
+ * 
+ * @param {string} inquiry - The user's question or request
+ * @returns {Promise<string>} A simulated response based on inquiry patterns
+ */
 const demoReply = async (inquiry) => {
     // Simple pattern matching for demo responses
     const lowerInquiry = inquiry.toLowerCase();
@@ -326,8 +333,18 @@ const demoReply = async (inquiry) => {
     return DEMO_RESPONSES.default[Math.floor(Math.random() * DEMO_RESPONSES.default.length)];
 };
 
-const reply = async (requestContext) => {
-    const { inquiry, history, delegates, conversationId, metadata = {} } = requestContext;
+/**
+ * Generates a reply to user inquiry using the LLM API with caching and history support.
+ * 
+ * @param {Object} context - Conversation context
+ * @param {string} context.inquiry - User's current question or request
+ * @param {Array<Object>} context.history - Previous conversation messages
+ * @param {Object} context.delegates - Optional callback handlers
+ * @param {Function} context.delegates.stream - Optional streaming handler for real-time responses
+ * @returns {Promise<Object>} Response object containing the answer and updated context
+ */
+const reply = async (context) => {
+    const { inquiry, history, delegates } = context;
     const { stream } = delegates || {};
     const cacheEnabled = config.get('caching.enabled', true);
     const activeAgent = agents.getActiveAgent();

@@ -1,26 +1,25 @@
 /**
  * Configuration management for Chat LLM v2
- * Handles application settings, profiles, and user preferences with persistent storage.
- * Supports nested configuration keys with dot notation (e.g., 'models.temperature').
+ * Handles application settings, profiles, and user preferences
  * 
  * @module ConfigManager
  * @author yonikashi432
  * @version 2.0.0
- * 
- * @example
- * const config = new ConfigManager('./config');
- * config.set('models.temperature', 0.8);
- * const temp = config.get('models.temperature');
  */
 
 const fs = require('fs');
 const path = require('path');
 
+/**
+ * ConfigManager - Centralized configuration management
+ * Provides persistent storage for application settings with support for
+ * nested keys, profiles, and runtime updates.
+ */
 class ConfigManager {
     /**
-     * Initialize the Configuration Manager
-     * @param {string} configDir - Directory to store configuration files (default: './config')
-     * @throws {Error} If configuration directory cannot be created
+     * Initialize the configuration manager
+     * 
+     * @param {string} configDir - Directory to store configuration files
      */
     constructor(configDir = './config') {
         if (typeof configDir !== 'string' || configDir.trim().length === 0) {
@@ -57,9 +56,10 @@ class ConfigManager {
     }
 
     /**
-     * Ensures configuration directories exist
+     * Ensure configuration directories exist
+     * Creates the config directory and profiles subdirectory if they don't exist
+     * 
      * @private
-     * @throws {Error} If directory creation fails
      */
     ensureConfigDir() {
         try {
@@ -74,7 +74,9 @@ class ConfigManager {
     }
 
     /**
-     * Loads configuration from disk or creates default configuration
+     * Load configuration from disk
+     * If no configuration file exists, creates one with default values
+     * 
      * @private
      */
     loadConfig() {
@@ -120,7 +122,9 @@ class ConfigManager {
     }
 
     /**
-     * Saves current configuration to disk
+     * Save configuration to disk
+     * Writes the current configuration to the settings file
+     * 
      * @private
      */
     saveConfig() {
@@ -137,15 +141,15 @@ class ConfigManager {
     }
 
     /**
-     * Get configuration value using dot notation
-     * @param {string} key - Configuration key (e.g., 'models.temperature')
-     * @param {*} defaultValue - Default value to return if key not found (default: null)
-     * @returns {*} Configuration value or default value
-     * @throws {TypeError} If key is not a string
+     * Get configuration value using dotted notation
+     * 
+     * @param {string} key - Configuration key (e.g., 'caching.enabled', 'models.temperature')
+     * @param {*} defaultValue - Default value if key doesn't exist
+     * @returns {*} Configuration value or default
      * 
      * @example
-     * const temp = config.get('models.temperature', 0.7);
-     * const cacheTTL = config.get('caching.ttl');
+     * const cachingEnabled = config.get('caching.enabled', true);
+     * const temperature = config.get('models.temperature', 0.7);
      */
     get(key, defaultValue = null) {
         if (typeof key !== 'string' || key.trim().length === 0) {

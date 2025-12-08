@@ -1,44 +1,28 @@
 /**
- * Response caching module for Chat LLM v2
- * Provides dual-layer (memory + disk) caching for LLM responses
- * to reduce API calls, improve performance, and save costs.
- * 
- * Features:
- * - Memory cache for instant retrieval
- * - Disk cache for persistence across restarts
- * - Automatic TTL (time-to-live) expiration
- * - Cache statistics and monitoring
+ * Response caching module for Chat LLM
+ * Provides two-tier caching (memory + disk) to reduce API calls and improve performance
  * 
  * @module ResponseCache
  * @author yonikashi432
  * @version 2.0.0
- * 
- * @example
- * const cache = new ResponseCache('./cache');
- * cache.set('What is AI?', 'AI is artificial intelligence...');
- * const response = cache.get('What is AI?'); // Returns cached response
  */
 
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
+/**
+ * ResponseCache - Intelligent caching system for LLM responses
+ * Implements a two-tier cache with in-memory cache for fast access
+ * and disk cache for persistence across restarts.
+ */
 class ResponseCache {
     /**
-     * Initialize the Response Cache
-     * @param {string} cacheDir - Directory to store cache files (default: './cache')
-     * @param {number} ttl - Time-to-live in milliseconds (default: 24 hours)
-     * @throws {Error} If cache directory cannot be created
+     * Initialize the response cache
+     * 
+     * @param {string} cacheDir - Directory to store cached responses
      */
-    constructor(cacheDir = './cache', ttl = 24 * 60 * 60 * 1000) {
-        if (typeof cacheDir !== 'string' || cacheDir.trim().length === 0) {
-            throw new Error('Cache directory must be a non-empty string');
-        }
-        
-        if (typeof ttl !== 'number' || ttl <= 0) {
-            throw new Error('TTL must be a positive number');
-        }
-        
+    constructor(cacheDir = './cache') {
         this.cacheDir = cacheDir;
         this.ttl = ttl;
         this.memoryCache = new Map();
@@ -49,9 +33,10 @@ class ResponseCache {
     }
 
     /**
-     * Ensures cache directory exists
+     * Ensure cache directory exists
+     * Creates the cache directory if it doesn't exist
+     * 
      * @private
-     * @throws {Error} If directory creation fails
      */
     ensureCacheDir() {
         try {
@@ -64,11 +49,12 @@ class ResponseCache {
     }
 
     /**
-     * Generate a deterministic cache key from input using SHA-256
+     * Generate a cache key from input text
+     * Uses SHA-256 hashing for consistent, unique keys
+     * 
+     * @param {string} input - Input text to generate key from
+     * @returns {string} SHA-256 hash as hexadecimal string
      * @private
-     * @param {string} input - Input text to generate key for
-     * @returns {string} Hexadecimal hash string
-     * @throws {TypeError} If input is not a string
      */
     generateKey(input) {
         if (typeof input !== 'string') {
@@ -79,16 +65,17 @@ class ResponseCache {
     }
 
     /**
-     * Get cached response for given input
-     * Checks memory cache first, then disk cache for better performance
-     * @param {string} input - Input text to look up
+     * Retrieve cached response for given input
+     * Checks memory cache first, then disk cache
+     * Automatically removes expired entries
+     * 
+     * @param {string} input - Input text to lookup
      * @returns {string|null} Cached response or null if not found/expired
-     * @throws {TypeError} If input is not a string
      * 
      * @example
-     * const response = cache.get('What is AI?');
-     * if (response) {
-     *   console.log('Cache hit:', response);
+     * const cached = cache.get('What is the capital of France?');
+     * if (cached) {
+     *   console.log('Using cached response:', cached);
      * }
      */
     get(input) {
@@ -142,13 +129,14 @@ class ResponseCache {
     }
 
     /**
-     * Store response in cache (both memory and disk)
-     * @param {string} input - Input text (used to generate cache key)
+     * Store response in cache
+     * Saves to both memory and disk for redundancy
+     * 
+     * @param {string} input - Input text (cache key)
      * @param {string} response - Response to cache
-     * @throws {TypeError} If input or response is not a string
      * 
      * @example
-     * cache.set('What is AI?', 'AI is artificial intelligence...');
+     * cache.set('What is AI?', 'Artificial Intelligence is...');
      */
     set(input, response) {
         if (typeof input !== 'string') {
@@ -186,11 +174,12 @@ class ResponseCache {
     }
 
     /**
-     * Clear all cached responses (memory and disk)
-     * WARNING: This will delete all cached data
+     * Clear all cached responses
+     * Removes entries from both memory and disk cache
      * 
      * @example
-     * cache.clear(); // Remove all cached responses
+     * cache.clear();
+     * console.log('Cache cleared');
      */
     clear() {
         // Clear memory cache
@@ -220,20 +209,18 @@ class ResponseCache {
     }
 
     /**
-     * Get comprehensive cache statistics
-     * @returns {Object} Statistics object containing:
-     *   - memoryCacheSize: Number of items in memory
-     *   - diskCacheFiles: Number of files on disk
-     *   - diskCacheSize: Total size in bytes
-     *   - diskCachePath: Cache directory path
-     *   - hits: Number of cache hits
-     *   - misses: Number of cache misses
-     *   - hitRate: Cache hit rate as percentage
-     *   - ttl: Current TTL in milliseconds
+     * Get cache statistics
+     * Returns information about cache size and usage
+     * 
+     * @returns {Object} Statistics object
+     * @returns {number} returns.memoryCacheSize - Number of items in memory cache
+     * @returns {number} returns.diskCacheSize - Total disk space used (bytes)
+     * @returns {string} returns.diskCachePath - Path to disk cache directory
      * 
      * @example
      * const stats = cache.getStats();
-     * console.log(`Hit rate: ${stats.hitRate}`);
+     * console.log(`Memory cache: ${stats.memoryCacheSize} entries`);
+     * console.log(`Disk usage: ${stats.diskCacheSize} bytes`);
      */
     getStats() {
         let diskSize = 0;
