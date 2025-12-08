@@ -7,6 +7,11 @@ const { analyzeSentiment } = require('./tools/sentiment_analyzer');
 const { RequestLogger } = require('./tools/request-logger');
 const { ResponseCache } = require('./tools/response-cache');
 const { ConfigManager } = require('./tools/config-manager');
+const { AgentManager } = require('./tools/agent-manager');
+const { ContextManager } = require('./tools/context-manager');
+const { PromptManager } = require('./tools/prompt-manager');
+const { MemoryManager } = require('./tools/memory-manager');
+const { TaskManager } = require('./tools/task-manager');
 
 const LLM_API_BASE_URL = process.env.LLM_API_BASE_URL || 'https://api.openai.com/v1';
 const LLM_API_KEY = process.env.LLM_API_KEY || process.env.OPENAI_API_KEY;
@@ -43,6 +48,11 @@ const CROSS = '✘';
 const cache = new ResponseCache('./cache');
 const config = new ConfigManager('./config');
 const logger = new RequestLogger('./logs');
+const agents = new AgentManager();
+const context = new ContextManager('./context-data');
+const prompts = new PromptManager();
+const memory = new MemoryManager('./memory');
+const tasks = new TaskManager();
 
 /**
  * Suspends the execution for a specified amount of time.
@@ -261,9 +271,6 @@ const DEMO_RESPONSES = {
     'capital': ['Paris is the capital of France.', 'The capital of France is Paris.'],
     'weather': ['I cannot check the current weather, but you can check a weather service online.', 'Weather information is not available in demo mode.'],
     'time': ['I cannot provide real-time information in demo mode.', 'Time-based queries are not supported in demo mode.'],
-    'planet': ['Jupiter is the largest planet in our solar system.', 'The largest planet is Jupiter.'],
-    'smallest': ['Mercury is the smallest planet in our solar system.', 'The smallest planet is Mercury.'],
-    'hottest': ['Venus is the hottest planet in our solar system.', 'The hottest planet is Venus.'],
     'default': ['This is a demo response since the LLM API is unavailable.', 'I am in demo mode and cannot provide real responses.', 'Demo mode is active - API responses are simulated.']
 };
 
@@ -277,12 +284,6 @@ const demoReply = async (inquiry) => {
         return DEMO_RESPONSES.weather[Math.floor(Math.random() * DEMO_RESPONSES.weather.length)];
     } else if (lowerInquiry.includes('time') || lowerInquiry.includes('hour') || lowerInquiry.includes('clock')) {
         return DEMO_RESPONSES.time[Math.floor(Math.random() * DEMO_RESPONSES.time.length)];
-    } else if (lowerInquiry.includes('largest') && lowerInquiry.includes('planet')) {
-        return DEMO_RESPONSES.planet[Math.floor(Math.random() * DEMO_RESPONSES.planet.length)];
-    } else if (lowerInquiry.includes('smallest') && lowerInquiry.includes('planet')) {
-        return DEMO_RESPONSES.smallest[Math.floor(Math.random() * DEMO_RESPONSES.smallest.length)];
-    } else if (lowerInquiry.includes('hottest') && lowerInquiry.includes('planet')) {
-        return DEMO_RESPONSES.hottest[Math.floor(Math.random() * DEMO_RESPONSES.hottest.length)];
     }
     
     return DEMO_RESPONSES.default[Math.floor(Math.random() * DEMO_RESPONSES.default.length)];
@@ -718,19 +719,39 @@ const canary = async () => {
     const args = process.argv.slice(2);
     
     if (args.length === 0 || args[0] === '--help' || args[0] === '-h' || args[0] === 'help') {
-        console.log(`${BOLD}Chat LLM v2${NORMAL} - Advanced LLM chat tool with caching & config\n`);
+        console.log(`${BOLD}Chat LLM v2${NORMAL} - Swiss Army Knife LLM Agent\n`);
         console.log(`${CYAN}Usage:${NORMAL}`);
         console.log(`  ./chat-llm.js                              # Interactive mode`);
         console.log(`  ./chat-llm.js <test-file>                 # Run test file`);
+        console.log(`  HTTP_PORT=5000 ./chat-llm.js              # Web interface\n`);
+        console.log(`${CYAN}Agent & Delegation:${NORMAL}`);
+        console.log(`  ./chat-llm.js agent-list                  # List available agents`);
+        console.log(`  ./chat-llm.js agent-activate <id>         # Activate an agent`);
+        console.log(`  ./chat-llm.js agent-stats                 # Agent usage statistics\n`);
+        console.log(`${CYAN}Context Management:${NORMAL}`);
+        console.log(`  ./chat-llm.js context-create <name>       # Create new context`);
+        console.log(`  ./chat-llm.js context-list                # List all contexts`);
+        console.log(`  ./chat-llm.js context-activate <name>     # Activate context`);
+        console.log(`  ./chat-llm.js context-stats               # Context statistics\n`);
+        console.log(`${CYAN}Prompt Management:${NORMAL}`);
+        console.log(`  ./chat-llm.js prompt-list                 # List all templates`);
+        console.log(`  ./chat-llm.js prompt-render <id>          # Render template\n`);
+        console.log(`${CYAN}Task Management:${NORMAL}`);
+        console.log(`  ./chat-llm.js task-list                   # List all tasks`);
+        console.log(`  ./chat-llm.js task-stats                  # Task queue statistics\n`);
+        console.log(`${CYAN}Memory & History:${NORMAL}`);
+        console.log(`  ./chat-llm.js memory-list                 # List conversations`);
+        console.log(`  ./chat-llm.js memory-stats                # Memory statistics\n`);
+        console.log(`${CYAN}Analysis & Logging:${NORMAL}`);
         console.log(`  ./chat-llm.js sentiment <text>            # Analyze sentiment`);
         console.log(`  ./chat-llm.js stats                       # Show request statistics`);
-        console.log(`  ./chat-llm.js export <format>             # Export logs (json|csv)`);
+        console.log(`  ./chat-llm.js export <format>             # Export logs (json|csv)\n`);
+        console.log(`${CYAN}Cache & Configuration:${NORMAL}`);
         console.log(`  ./chat-llm.js cache-stats                 # Show cache statistics`);
         console.log(`  ./chat-llm.js cache-clear                 # Clear response cache`);
         console.log(`  ./chat-llm.js config-get <key>            # Get config value`);
         console.log(`  ./chat-llm.js config-set <key> <value>    # Set config value`);
-        console.log(`  ./chat-llm.js config-list                 # List all profiles`);
-        console.log(`  HTTP_PORT=5000 ./chat-llm.js              # Web interface\n`);
+        console.log(`  ./chat-llm.js config-list                 # List all profiles\n`);
         console.log(`${CYAN}Environment Variables:${NORMAL}`);
         console.log(`  LLM_API_BASE_URL         # API endpoint (default: OpenAI)`);
         console.log(`  LLM_API_KEY              # API authentication key`);
@@ -740,6 +761,11 @@ const canary = async () => {
         console.log(`  LLM_DEMO_MODE            # Run in demo mode`);
         console.log(`  HTTP_PORT                # Enable web server on port\n`);
         console.log(`${CYAN}v2 Features:${NORMAL}`);
+        console.log(`  - Multi-agent orchestration with specialized agents`);
+        console.log(`  - Custom data & context management`);
+        console.log(`  - Advanced prompt templating system`);
+        console.log(`  - Intelligent memory & conversation history`);
+        console.log(`  - Task queue & workflow management`);
         console.log(`  - Response caching (24h TTL)`);
         console.log(`  - Configuration management`);
         console.log(`  - Request logging & analytics`);
@@ -796,6 +822,137 @@ const canary = async () => {
         } else {
             profiles.forEach(p => console.log(`  - ${p}`));
         }
+    } else if (args[0] === 'agent-list') {
+        const allAgents = agents.listAgents();
+        console.log(`${CYAN}Available Agents (${allAgents.length}):${NORMAL}\n`);
+        allAgents.forEach(agent => {
+            console.log(`${BOLD}${agent.name}${NORMAL} (${agent.id})`);
+            console.log(`  ${agent.description}`);
+            console.log(`  Capabilities: ${agent.capabilities.join(', ')}`);
+            if (agent.lastUsedAt) {
+                console.log(`  Last used: ${agent.lastUsedAt}`);
+            }
+            console.log();
+        });
+    } else if (args[0] === 'agent-activate' && args.length > 1) {
+        const agentId = args[1];
+        const agent = agents.activateAgent(agentId);
+        if (agent) {
+            console.log(`${GREEN}${CHECK}${NORMAL} Activated agent: ${BOLD}${agent.name}${NORMAL}`);
+            console.log(`System prompt: ${agent.systemPrompt.substring(0, 100)}...`);
+        } else {
+            console.error(`${RED}Agent '${agentId}' not found${NORMAL}`);
+            process.exit(-1);
+        }
+    } else if (args[0] === 'agent-stats') {
+        const stats = agents.getStats();
+        console.log('Agent Statistics:');
+        stats.forEach(stat => {
+            console.log(`\n${stat.name} (${stat.id})`);
+            console.log(`  Usage count: ${stat.usageCount}`);
+            console.log(`  Total tokens: ${stat.totalTokens}`);
+            console.log(`  Created: ${stat.createdAt}`);
+            if (stat.lastUsedAt) {
+                console.log(`  Last used: ${stat.lastUsedAt}`);
+            }
+        });
+    } else if (args[0] === 'context-create' && args.length > 1) {
+        const contextName = args[1];
+        const ctx = context.createContext(contextName);
+        console.log(`${GREEN}${CHECK}${NORMAL} Created context: ${BOLD}${contextName}${NORMAL}`);
+    } else if (args[0] === 'context-list') {
+        const contexts = context.listContexts();
+        if (contexts.length === 0) {
+            console.log('No contexts found.');
+        } else {
+            console.log(`${CYAN}Contexts (${contexts.length}):${NORMAL}\n`);
+            contexts.forEach(ctx => {
+                console.log(`${BOLD}${ctx.name}${NORMAL}`);
+                console.log(`  Documents: ${ctx.documents}`);
+                console.log(`  Tags: ${ctx.tags.join(', ') || 'none'}`);
+                console.log(`  Size: ${ctx.size} bytes`);
+                console.log(`  Updated: ${ctx.updatedAt}`);
+                console.log();
+            });
+        }
+    } else if (args[0] === 'context-activate' && args.length > 1) {
+        const contextName = args[1];
+        const ctx = context.activateContext(contextName);
+        if (ctx) {
+            console.log(`${GREEN}${CHECK}${NORMAL} Activated context: ${BOLD}${contextName}${NORMAL}`);
+        } else {
+            console.error(`${RED}Context '${contextName}' not found${NORMAL}`);
+            process.exit(-1);
+        }
+    } else if (args[0] === 'context-stats') {
+        const stats = context.getStats();
+        console.log('Context Statistics:');
+        console.log(`  Total contexts: ${stats.totalContexts}`);
+        console.log(`  Total size: ${stats.totalSize} bytes`);
+        console.log(`  Total documents: ${stats.totalDocuments}`);
+        console.log(`  Active context: ${stats.activeContext || 'none'}`);
+    } else if (args[0] === 'prompt-list') {
+        const templates = prompts.listTemplates();
+        console.log(`${CYAN}Prompt Templates (${templates.length}):${NORMAL}\n`);
+        templates.forEach(template => {
+            console.log(`${BOLD}${template.name}${NORMAL} (${template.id})`);
+            console.log(`  ${template.description}`);
+            console.log(`  Variables: ${template.variables.join(', ')}`);
+            console.log(`  Usage: ${template.usageCount} times`);
+            console.log();
+        });
+    } else if (args[0] === 'prompt-render' && args.length > 1) {
+        const templateId = args[1];
+        const template = prompts.getTemplate(templateId);
+        if (template) {
+            console.log(`${CYAN}Template: ${template.name}${NORMAL}\n`);
+            console.log(template.template);
+        } else {
+            console.error(`${RED}Template '${templateId}' not found${NORMAL}`);
+            process.exit(-1);
+        }
+    } else if (args[0] === 'task-list') {
+        const allTasks = tasks.listTasks();
+        console.log(`${CYAN}Tasks (${allTasks.length}):${NORMAL}\n`);
+        allTasks.forEach(task => {
+            const status = task.metadata.status === 'completed' ? GREEN : YELLOW;
+            console.log(`${BOLD}${task.name}${NORMAL} [${status}${task.metadata.status}${NORMAL}]`);
+            console.log(`  ID: ${task.id}`);
+            console.log(`  Type: ${task.type}`);
+            console.log(`  Priority: ${task.metadata.priority}`);
+        });
+    } else if (args[0] === 'task-stats') {
+        const stats = tasks.getQueueStats();
+        console.log('Task Queue Statistics:');
+        console.log(`  Total tasks: ${stats.totalTasks}`);
+        console.log(`  Queued: ${stats.queuedCount}`);
+        console.log(`  Pending: ${stats.pendingCount}`);
+        console.log(`  Running: ${stats.runningCount}`);
+        console.log(`  Completed: ${stats.completedCount}`);
+        console.log(`  Workflows: ${stats.workflows}`);
+    } else if (args[0] === 'memory-list') {
+        const conversations = memory.listConversations();
+        if (conversations.length === 0) {
+            console.log('No conversations found.');
+        } else {
+            console.log(`${CYAN}Conversations (${conversations.length}):${NORMAL}\n`);
+            conversations.forEach(conv => {
+                console.log(`${BOLD}${conv.id}${NORMAL}`);
+                console.log(`  Messages: ${conv.messageCount}`);
+                console.log(`  Tokens: ${conv.tokenCount}`);
+                console.log(`  Created: ${conv.createdAt}`);
+                console.log(`  Topics: ${conv.topics.join(', ') || 'none'}`);
+                console.log();
+            });
+        }
+    } else if (args[0] === 'memory-stats') {
+        const stats = memory.getStats();
+        console.log('Memory Statistics:');
+        console.log(`  Total conversations: ${stats.totalConversations}`);
+        console.log(`  Total messages: ${stats.totalMessages}`);
+        console.log(`  Total tokens: ${stats.totalTokens}`);
+        console.log(`  Short-term memory: ${stats.shortTermMemorySize} items`);
+        console.log(`  Long-term memory: ${stats.longTermMemorySize} items`);
     } else {
         await canary(); // Only run canary if not directly testing sentiment
         if (args.length > 0) {
