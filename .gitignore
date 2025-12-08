@@ -59,3 +59,8 @@ typings/
 
 # next.js build output
 .next
+
+# Chat LLM v2 runtime directories
+cache/
+context-data/
+memory/
