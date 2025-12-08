@@ -1,0 +1,45 @@
+{
+  "name": "ai-research",
+  "data": {},
+  "metadata": {
+    "topic": "Artificial Intelligence",
+    "started": "2025-12-08T09:41:08.266Z",
+    "createdAt": "2025-12-08T09:41:08.266Z",
+    "updatedAt": "2025-12-08T09:41:08.270Z",
+    "version": 1
+  },
+  "documents": [
+    {
+      "name": "neural-networks.txt",
+      "content": "Neural networks are computing systems inspired by biological neural networks.\nThey consist of interconnected nodes (neurons) that process information using a connectionist approach.\nDeep learning uses multiple layers of neural networks to progressively extract higher-level features.",
+      "type": "text",
+      "size": 283,
+      "metadata": {
+        "author": "AI Researcher",
+        "year": 2024,
+        "createdAt": "2025-12-08T09:41:08.268Z",
+        "updatedAt": "2025-12-08T09:41:08.268Z"
+      },
+      "hash": "13656c66"
+    },
+    {
+      "name": "machine-learning.txt",
+      "content": "Machine learning is a subset of artificial intelligence that enables systems to learn\nand improve from experience without being explicitly programmed. It focuses on developing algorithms\nthat can access data and use it to learn for themselves.",
+      "type": "text",
+      "size": 243,
+      "metadata": {
+        "author": "ML Expert",
+        "year": 2024,
+        "createdAt": "2025-12-08T09:41:08.268Z",
+        "updatedAt": "2025-12-08T09:41:08.268Z"
+      },
+      "hash": "21d13914"
+    }
+  ],
+  "tags": [
+    "ai",
+    "machine-learning",
+    "deep-learning"
+  ],
+  "size": 1198
+}
