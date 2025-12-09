@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat LLM v2.2 - Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Chat LLM Dashboard</h1>
+            <div class="version">v2.2.0</div>
+            <div class="status-indicator" id="status">
+                <span class="dot"></span>
+                <span>Connecting...</span>
+            </div>
+        </header>
+
+        <div class="metrics-grid">
+            <!-- System Metrics -->
+            <div class="card">
+                <h2>System Metrics</h2>
+                <div class="metric-row">
+                    <div class="metric-label">Uptime</div>
+                    <div class="metric-value" id="uptime">-</div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-label">Memory Usage</div>
+                    <div class="metric-value" id="memory">-</div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-label">Node.js Version</div>
+                    <div class="metric-value" id="node-version">-</div>
+                </div>
+            </div>
+
+            <!-- Performance Metrics -->
+            <div class="card">
+                <h2>Performance</h2>
+                <div class="metric-row">
+                    <div class="metric-label">Total Requests</div>
+                    <div class="metric-value" id="requests">0</div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-label">Avg Duration</div>
+                    <div class="metric-value" id="avg-duration">-</div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-label">Success Rate</div>
+                    <div class="metric-value" id="success-rate">-</div>
+                </div>
+            </div>
+
+            <!-- Cache Metrics -->
+            <div class="card">
+                <h2>Cache Statistics</h2>
+                <div class="metric-row">
+                    <div class="metric-label">Hit Rate</div>
+                    <div class="metric-value" id="cache-hit-rate">0%</div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-label">Total Hits</div>
+                    <div class="metric-value" id="cache-hits">0</div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-label">Cache Size</div>
+                    <div class="metric-value" id="cache-size">0 B</div>
+                </div>
+            </div>
+
+            <!-- Memory/Conversations -->
+            <div class="card">
+                <h2>Conversations</h2>
+                <div class="metric-row">
+                    <div class="metric-label">Total Conversations</div>
+                    <div class="metric-value" id="conversations">0</div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-label">Total Messages</div>
+                    <div class="metric-value" id="messages">0</div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-label">Total Tokens</div>
+                    <div class="metric-value" id="tokens">0</div>
+                </div>
+            </div>
+
+            <!-- Webhooks -->
+            <div class="card">
+                <h2>Webhooks</h2>
+                <div class="metric-row">
+                    <div class="metric-label">Registered</div>
+                    <div class="metric-value" id="webhooks-total">0</div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-label">Total Deliveries</div>
+                    <div class="metric-value" id="webhooks-deliveries">0</div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-label">Success Rate</div>
+                    <div class="metric-value" id="webhooks-success">-</div>
+                </div>
+            </div>
+
+            <!-- Agents -->
+            <div class="card">
+                <h2>Agent Activity</h2>
+                <div id="agents-list">
+                    <p class="loading">Loading agent statistics...</p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Last updated: <span id="last-update">-</span></p>
+            <p>Auto-refresh: <span id="refresh-interval">5s</span></p>
+        </footer>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>

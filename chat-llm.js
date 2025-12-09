@@ -23,6 +23,7 @@ const { ConversationManager } = require('./tools/conversation-manager');
 const { AdvancedCache } = require('./tools/advanced-cache');
 const { MetricsExporter } = require('./tools/metrics-exporter');
 const { WebhookManager } = require('./tools/webhook-manager');
+const { DashboardServer } = require('./tools/dashboard/dashboard-server');
 
 const LLM_API_BASE_URL = process.env.LLM_API_BASE_URL || 'https://api.openai.com/v1';
 const LLM_API_KEY = process.env.LLM_API_KEY || process.env.OPENAI_API_KEY;
@@ -946,7 +947,9 @@ const canary = async () => {
         console.log(`  ./chat-llm.js metrics-export prometheus   # Export in Prometheus format`);
         console.log(`  ./chat-llm.js webhook-list                # List registered webhooks`);
         console.log(`  ./chat-llm.js webhook-register <event> <url> # Register webhook`);
-        console.log(`  ./chat-llm.js webhook-stats               # Webhook statistics\n`);
+        console.log(`  ./chat-llm.js webhook-stats               # Webhook statistics`);
+        console.log(`  ./chat-llm.js dashboard [port]            # Start real-time dashboard (default: 8080)`);
+        console.log(`  ./chat-llm.js dashboard-status            # Check dashboard availability\n`);
         console.log(`${CYAN}Environment Variables:${NORMAL}`);
         console.log(`  LLM_API_BASE_URL         # API endpoint (default: OpenAI)`);
         console.log(`  LLM_API_KEY              # API authentication key`);
@@ -1233,6 +1236,34 @@ const canary = async () => {
         console.log(`Version: ${BOLD}2.2.0${NORMAL} (v2.2 Development)`);
         console.log(`Node.js: ${process.version}`);
         console.log(`Platform: ${process.platform} (${process.arch})`);
+    } else if (args[0] === 'dashboard' || args[0] === 'dashboard-start') {
+        // v2.2: Start dashboard server
+        const port = args.length > 1 ? parseInt(args[1]) : 8080;
+        const dashboard = new DashboardServer({
+            port,
+            metricsExporter,
+            webhooks,
+            eventBus,
+            performance
+        });
+        
+        console.log(`${CYAN}Starting Chat LLM Dashboard...${NORMAL}`);
+        dashboard.start()
+            .then(() => {
+                console.log(`${GREEN}${CHECK}${NORMAL} Dashboard is running`);
+                console.log(`${CYAN}Access at:${NORMAL} http://localhost:${port}`);
+                console.log(`${GRAY}Press Ctrl+C to stop${NORMAL}`);
+            })
+            .catch(error => {
+                console.error(`${RED}Failed to start dashboard: ${error.message}${NORMAL}`);
+                process.exit(-1);
+            });
+    } else if (args[0] === 'dashboard-status') {
+        // v2.2: Check if dashboard is available
+        console.log(`${CYAN}Dashboard Status:${NORMAL}`);
+        console.log(`  Status: ${GREEN}Available${NORMAL}`);
+        console.log(`  Default port: 8080`);
+        console.log(`  Start with: ./chat-llm.js dashboard [port]`);
     } else {
         await canary(); // Only run canary if not directly testing sentiment
         if (args.length > 0) {
