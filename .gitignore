@@ -67,3 +67,5 @@ typings/
 cache/
 context-data/
 memory/
+analytics/
+conversations/
