@@ -1,10 +1,16 @@
 # Chat LLM
 
-**Chat LLM** is a simple, zero-dependency tool to chat with an LLM (large language model). It works seamlessly with both cloud-based LLM services (e.g., [OpenAI GPT](https://platform.openai.com/docs), [Groq](https://groq.com), [OpenRouter](https://openrouter.ai)) and locally hosted LLMs (e.g. [llama.cpp](https://github.com/ggerganov/llama.cpp), [LM Studio](https://lmstudio.ai), [Ollama](https://ollama.com)).
+**Chat LLM** is a Swiss Army Knife for LLM-powered tasks. It's a simple, zero-dependency tool to chat with an LLM (large language model) that provides advanced features like agent orchestration, context management, memory systems, task automation, and enterprise-grade monitoring.
+
+It works seamlessly with both cloud-based LLM services (e.g., [OpenAI GPT](https://platform.openai.com/docs), [Groq](https://groq.com), [OpenRouter](https://openrouter.ai)) and locally hosted LLMs (e.g. [llama.cpp](https://github.com/ggerganov/llama.cpp), [LM Studio](https://lmstudio.ai), [Ollama](https://ollama.com)).
 
 Chat LLM is accessible via the terminal or through its minimalist web interface.
 
+**Current Version**: 2.2.0 (Development)
+
 <img src="chat-llm.png" alt="Chat LLM" width="50%" height="50%"/>
+
+## Quick Start
 
 To run Chat LLM, ensure that [Node.js](https://nodejs.org) (v18 or higher) or [Bun](https://bun.sh) is installed.
 
@@ -29,6 +35,154 @@ HTTP_PORT=5000 ./chat-llm.js
 ```
 
 Then, open a web browser and go to `localhost:5000`.
+
+## v2 Features - Swiss Army Knife for AI
+
+Chat LLM v2 introduces powerful multi-purpose agent capabilities:
+
+### Agent Orchestration
+Specialized agents for different tasks:
+- **Researcher** - Information gathering and synthesis
+- **Coder** - Programming and debugging
+- **Writer** - Content creation and editing
+- **Analyst** - Data analysis and insights
+- **Tutor** - Educational explanations
+- **Solver** - Problem-solving methodology
+- **Support** - Customer service
+
+```bash
+./chat-llm.js agent-list              # View all agents
+./chat-llm.js agent-activate coder    # Activate agent
+./chat-llm.js agent-stats             # View statistics
+```
+
+### Context Management
+Work with custom data and knowledge bases:
+
+```bash
+./chat-llm.js context-create research      # Create context
+./chat-llm.js context-list                 # List contexts
+./chat-llm.js context-activate research    # Activate context
+```
+
+### Advanced Prompt Templates
+Pre-built templates for common tasks with variable substitution and conditionals:
+
+```bash
+./chat-llm.js prompt-list      # View templates
+./chat-llm.js prompt-render analysis  # Display template
+```
+
+### Intelligent Memory
+Persistent conversation memory with automatic summarization:
+
+```bash
+./chat-llm.js memory-list      # List conversations
+./chat-llm.js memory-stats     # Memory usage
+```
+
+### Task & Workflow Management
+Queue tasks, manage workflows, and batch process:
+
+```bash
+./chat-llm.js task-list        # View tasks
+./chat-llm.js task-stats       # Queue statistics
+```
+
+### Analysis & Logging
+Built-in sentiment analysis, request logging, and statistics:
+
+```bash
+./chat-llm.js sentiment "text"  # Analyze sentiment
+./chat-llm.js stats             # Request statistics
+./chat-llm.js export json       # Export logs
+```
+
+## v2.2 Features - Monitoring & Integration (Development)
+
+Chat LLM v2.2 introduces enterprise-grade monitoring, webhooks, and observability:
+
+### Metrics Export & Monitoring
+Export system metrics in Prometheus or JSON format for monitoring dashboards:
+
+```bash
+./chat-llm.js metrics-summary              # Quick metrics overview
+./chat-llm.js metrics-export prometheus    # Prometheus format
+./chat-llm.js metrics-export json          # JSON format
+```
+
+Metrics include:
+- System uptime and performance
+- Request/response statistics
+- Cache hit/miss ratios
+- Agent usage patterns
+- Memory and resource utilization
+
+### Webhook Integration
+Trigger HTTP webhooks for events and integrate with external systems:
+
+```bash
+./chat-llm.js webhook-list                        # List webhooks
+./chat-llm.js webhook-register event url          # Register webhook
+./chat-llm.js webhook-stats                       # Delivery statistics
+```
+
+Features:
+- Event-based webhooks with pattern matching
+- Retry logic with exponential backoff
+- HMAC signatures for security
+- Delivery tracking and logs
+
+### Enhanced Testing
+Comprehensive test suites for quality assurance:
+
+```bash
+node tests/e2e-tests.js         # End-to-end tests
+node tests/test-suite.js        # Unit tests
+```
+
+For detailed v2 features and examples, see [QUICK_START.md](QUICK_START.md) and [DEVELOPMENT.md](DEVELOPMENT.md).
+
+For v2.2 development roadmap, see [V2_2_DEVELOPMENT_PLAN.md](V2_2_DEVELOPMENT_PLAN.md).
+
+## Response Caching & Configuration
+
+Chat LLM automatically caches responses for 24 hours to avoid repeated calls to your LLM API. Cached results live in `./cache` and are reused instantly in the terminal and web UI. This keeps latency low and saves API credits when you revisit the same prompt during a debugging or evaluation session.
+
+```bash
+./chat-llm.js cache-stats         # Inspect memory/disk cache usage
+./chat-llm.js cache-clear         # Purge all cached responses
+./chat-llm.js config-get caching.enabled
+./chat-llm.js config-set caching.enabled false   # Disable caching
+./chat-llm.js config-set caching.enabled true    # Re-enable caching
+```
+
+When caching is disabled via the config command, Chat LLM immediately falls back to live responses without touching the cache. Re-enabling restores the 24-hour TTL without restarting the app.
+
+## Agent, Context, and Memory Orchestration
+
+Activating an agent (`./chat-llm.js agent-activate coder`) now feeds that persona’s system prompt straight into every chat request, so the CLI/web UI instantly adopts the tone and capabilities of the selected specialist. The active context (`context-create`, `context-activate`) is summarized and injected as another system message, giving the LLM a compact view of your tagged data and uploaded documents before it answers.
+
+```bash
+./chat-llm.js agent-list
+./chat-llm.js agent-activate researcher
+./chat-llm.js context-create customer-success
+./chat-llm.js context-activate customer-success
+./chat-llm.js memory-list
+./chat-llm.js memory-stats
+```
+
+Terminal and web sessions persist into the new Memory Manager (`./memory/`), so `memory-list` can replay full transcripts even across restarts. Each cache hit is streamed via the existing delegate, logged with metadata (agent, context, model), and recorded in memory so you can audit automated workflows.
+
+## Prompt Templates
+
+The Prompt Manager ships with battle-tested templates for analysis, coding, research, and more. You can now render them directly from the CLI with inline variables:
+
+```bash
+./chat-llm.js prompt-run analysis data="Q4 sales dipped 14%" focus="root-cause, mitigation"
+```
+
+Combine this with `prompt-list` and `prompt-render` to inspect or extend the templates before handing the generated instructions to the chat runtime.
 
 ## Multi-language Support
 
@@ -206,3 +360,188 @@ Assuming the above content is in `qa.txt`, executing the following command will 
 ```
 
 For additional examples, please refer to the `tests/` subdirectory.
+
+## v2 Advanced Features
+
+### Configuration Management
+
+Chat LLM v2 includes a comprehensive configuration system for managing application settings and profiles:
+
+```bash
+# Get configuration values
+./chat-llm.js config-get models.temperature
+./chat-llm.js config-get caching.enabled
+
+# Set configuration values
+./chat-llm.js config-set models.temperature 0.8
+./chat-llm.js config-set caching.ttl 3600000
+
+# List available profiles
+./chat-llm.js config-list
+```
+
+Default configuration includes:
+- Model settings (temperature, max tokens)
+- Caching behavior (TTL: 24 hours)
+- Logging configuration
+- API timeout and retry settings
+
+### Response Caching
+
+Intelligent response caching reduces API calls and improves performance:
+
+```bash
+# View cache statistics
+./chat-llm.js cache-stats
+
+# Clear cache
+./chat-llm.js cache-clear
+```
+
+The cache automatically stores responses with a 24-hour TTL and can be enabled/disabled via configuration.
+
+### Request Logging & Analytics
+
+All requests are logged automatically for monitoring and debugging:
+
+```bash
+# View statistics
+./chat-llm.js stats
+
+# Export logs
+./chat-llm.js export json > logs.json
+./chat-llm.js export csv > logs.csv
+```
+
+Logs include:
+- Request timestamps
+- Operation types
+- Response times
+- Request/response content (truncated)
+
+### Sentiment Analysis
+
+Built-in sentiment analysis for understanding user input and conversation tone:
+
+```bash
+./chat-llm.js sentiment "This is amazing!"
+```
+
+Returns sentiment classification (positive, negative, neutral) with scores.
+
+### Demo Mode
+
+Test the UI and features without API credentials:
+
+```bash
+LLM_DEMO_MODE=1 HTTP_PORT=5000 ./chat-llm.js
+```
+
+Demo mode simulates intelligent responses for testing and development.
+
+## Architecture
+
+Chat LLM v2 is built with the following components:
+
+- **Core**: Zero-dependency chat interface
+- **Cache**: Automatic response caching (memory + disk)
+- **Config**: Settings and profile management
+- **Logger**: Request tracking and analytics
+- **Monitor**: Performance metrics collection
+- **Tools**: Sentiment analysis and utilities
+- **Agents**: Multi-purpose agent orchestration
+- **Context**: Custom data and knowledge management
+- **Prompts**: Advanced template system
+- **Memory**: Conversation history and persistence
+- **Tasks**: Workflow and batch processing
+
+All components are optional and can be disabled via configuration for minimal resource usage.
+
+## Documentation
+
+### Getting Started
+- **[README.md](README.md)** - Overview and quick start guide (this file)
+- **[QUICK_START.md](QUICK_START.md)** - Quick reference for v2 features
+- **[DEVELOPMENT.md](DEVELOPMENT.md)** - Development guide and architecture details
+
+### API & Usage
+- **[API_REFERENCE.md](API_REFERENCE.md)** - Complete API documentation for all modules
+- **[EXAMPLES.md](EXAMPLES.md)** - Practical examples and real-world use cases
+
+### Planning & Roadmap
+- **[ROADMAP.md](ROADMAP.md)** - Current development roadmap and enhancements
+- **[FUTURE_FEATURES.md](FUTURE_FEATURES.md)** - Future feature proposals and ideas
+- **[RELEASE_NOTES_V2.md](RELEASE_NOTES_V2.md)** - Version 2 release notes
+
+### Testing
+- **tests/** - Evaluation tests in multiple languages
+
+## Code Quality & Best Practices
+
+Chat LLM v2 includes comprehensive improvements:
+
+### Input Validation
+All public APIs validate inputs with descriptive error messages:
+```javascript
+// Example: Type checking and validation
+if (typeof text !== 'string' || text.trim().length === 0) {
+  throw new TypeError('Text must be a non-empty string');
+}
+```
+
+### Memory Management
+Automatic limits prevent memory overflow:
+- Request Logger: 10,000 in-memory logs
+- Response Cache: 1,000 memory entries
+- Performance Monitor: Configurable limit (default: 10,000)
+
+### Error Handling
+All modules include comprehensive error handling:
+```javascript
+try {
+  const result = await operation();
+  logger.logRequest('operation', input, result, duration);
+} catch (error) {
+  logger.logRequest('operation', input, error.message, duration, { error: true });
+  throw error;
+}
+```
+
+### Performance Monitoring
+Built-in metrics tracking:
+- P95/P99 latency percentiles
+- Cache hit rates
+- Memory usage monitoring
+- Operation statistics
+
+## Contributing
+
+Contributions are welcome! Please:
+
+1. Read the [DEVELOPMENT.md](DEVELOPMENT.md) guide
+2. Review [FUTURE_FEATURES.md](FUTURE_FEATURES.md) for feature ideas
+3. Check existing issues and PRs
+4. Follow the code quality standards
+5. Add tests for new features
+6. Update documentation
+
+## Community & Support
+
+- **Issues**: Report bugs or request features on GitHub
+- **Discussions**: Share ideas and ask questions
+- **Examples**: Check [EXAMPLES.md](EXAMPLES.md) for common patterns
+- **API Docs**: See [API_REFERENCE.md](API_REFERENCE.md) for detailed API info
+
+## License
+
+See [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+Chat LLM v2 is built with zero external dependencies, leveraging only Node.js built-in modules for maximum portability and minimal overhead.
+
+---
+
+**Version**: 2.0.0  
+**Last Updated**: December 8, 2025  
+**Maintainer**: yonikashi432
