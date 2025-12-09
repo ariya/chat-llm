@@ -18,5 +18,8 @@
     "default": "gpt-4",
     "temperature": 0.9,
     "maxTokens": 2000
-  }
+  },
+  "test-key": "test-value",
+  "test1": "value1",
+  "test2": "value2"
 }
