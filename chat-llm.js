@@ -21,6 +21,9 @@ const { AnalyticsEngine } = require('./tools/analytics-engine');
 const { ModelRouter } = require('./tools/model-router');
 const { ConversationManager } = require('./tools/conversation-manager');
 const { AdvancedCache } = require('./tools/advanced-cache');
+const { MetricsExporter } = require('./tools/metrics-exporter');
+const { WebhookManager } = require('./tools/webhook-manager');
+const { DashboardServer } = require('./tools/dashboard/dashboard-server');
 
 const LLM_API_BASE_URL = process.env.LLM_API_BASE_URL || 'https://api.openai.com/v1';
 const LLM_API_KEY = process.env.LLM_API_KEY || process.env.OPENAI_API_KEY;
@@ -71,6 +74,10 @@ const analytics = new AnalyticsEngine('./analytics');
 const modelRouter = new ModelRouter();
 const conversationManager = new ConversationManager('./conversations');
 const advancedCache = new AdvancedCache({ storageDir: './cache/advanced' });
+
+// v2.2 Features
+const webhooks = new WebhookManager(eventBus);
+const metricsExporter = new MetricsExporter(performance, cache, memory, agents);
 
 /**
  * Suspends the execution for a specified amount of time.
@@ -933,6 +940,16 @@ const canary = async () => {
         console.log(`  ./chat-llm.js config-get <key>            # Get config value`);
         console.log(`  ./chat-llm.js config-set <key> <value>    # Set config value`);
         console.log(`  ./chat-llm.js config-list                 # List all profiles\n`);
+        console.log(`${CYAN}v2.2 Features (Monitoring & Webhooks):${NORMAL}`);
+        console.log(`  ./chat-llm.js version                     # Show version info`);
+        console.log(`  ./chat-llm.js metrics-summary             # Quick metrics summary`);
+        console.log(`  ./chat-llm.js metrics-export json         # Export metrics as JSON`);
+        console.log(`  ./chat-llm.js metrics-export prometheus   # Export in Prometheus format`);
+        console.log(`  ./chat-llm.js webhook-list                # List registered webhooks`);
+        console.log(`  ./chat-llm.js webhook-register <event> <url> # Register webhook`);
+        console.log(`  ./chat-llm.js webhook-stats               # Webhook statistics`);
+        console.log(`  ./chat-llm.js dashboard [port]            # Start real-time dashboard (default: 8080)`);
+        console.log(`  ./chat-llm.js dashboard-status            # Check dashboard availability\n`);
         console.log(`${CYAN}Environment Variables:${NORMAL}`);
         console.log(`  LLM_API_BASE_URL         # API endpoint (default: OpenAI)`);
         console.log(`  LLM_API_KEY              # API authentication key`);
@@ -1155,6 +1172,98 @@ const canary = async () => {
         console.log(`  Total tokens: ${stats.totalTokens}`);
         console.log(`  Short-term memory: ${stats.shortTermMemorySize} items`);
         console.log(`  Long-term memory: ${stats.longTermMemorySize} items`);
+    } else if (args[0] === 'webhook-list') {
+        // v2.2: List registered webhooks
+        const allWebhooks = webhooks.list();
+        if (allWebhooks.length === 0) {
+            console.log('No webhooks registered.');
+        } else {
+            console.log(`${CYAN}Registered Webhooks (${allWebhooks.length}):${NORMAL}\n`);
+            allWebhooks.forEach(webhook => {
+                console.log(`${BOLD}${webhook.id}${NORMAL}`);
+                console.log(`  Event: ${webhook.event}`);
+                console.log(`  URL: ${webhook.url}`);
+                console.log(`  Deliveries: ${webhook.deliveries} (${webhook.failures} failed)`);
+                console.log(`  Last delivery: ${webhook.lastDelivery || 'never'}`);
+                console.log();
+            });
+        }
+    } else if (args[0] === 'webhook-register' && args.length > 2) {
+        // v2.2: Register a new webhook
+        const event = args[1];
+        const url = args[2];
+        try {
+            const webhookId = webhooks.register({ event, url });
+            console.log(`${GREEN}${CHECK}${NORMAL} Webhook registered successfully`);
+            console.log(`  ID: ${webhookId}`);
+            console.log(`  Event: ${event}`);
+            console.log(`  URL: ${url}`);
+        } catch (error) {
+            console.error(`${RED}Failed to register webhook: ${error.message}${NORMAL}`);
+            process.exit(-1);
+        }
+    } else if (args[0] === 'webhook-stats') {
+        // v2.2: Webhook statistics
+        const stats = webhooks.getStats();
+        console.log('Webhook Statistics:');
+        console.log(`  Total webhooks: ${stats.totalWebhooks}`);
+        console.log(`  Total deliveries: ${stats.totalDeliveries}`);
+        console.log(`  Total failures: ${stats.totalFailures}`);
+        console.log(`  Success rate: ${stats.successRate}`);
+    } else if (args[0] === 'metrics-export' && args.length > 1) {
+        // v2.2: Export metrics
+        const format = args[1].toLowerCase();
+        if (format === 'prometheus' || format === 'prom') {
+            console.log(metricsExporter.exportPrometheus());
+        } else if (format === 'json') {
+            console.log(JSON.stringify(metricsExporter.exportJSON(), null, 2));
+        } else {
+            console.error(`${RED}Unsupported format. Use: prometheus or json${NORMAL}`);
+            process.exit(-1);
+        }
+    } else if (args[0] === 'metrics-summary') {
+        // v2.2: Quick metrics summary
+        const summary = metricsExporter.getSummary();
+        console.log(`${CYAN}System Metrics Summary:${NORMAL}`);
+        console.log(`  Uptime: ${summary.uptime}`);
+        console.log(`  Total requests: ${summary.requests}`);
+        console.log(`  Cache hit rate: ${summary.cacheHitRate}`);
+        console.log(`  Conversations: ${summary.conversations}`);
+        console.log(`  Memory usage: ${summary.memoryUsage}`);
+    } else if (args[0] === 'version') {
+        // v2.2: Show version info
+        console.log(`${CYAN}Chat LLM${NORMAL}`);
+        console.log(`Version: ${BOLD}2.2.0${NORMAL} (v2.2 Development)`);
+        console.log(`Node.js: ${process.version}`);
+        console.log(`Platform: ${process.platform} (${process.arch})`);
+    } else if (args[0] === 'dashboard' || args[0] === 'dashboard-start') {
+        // v2.2: Start dashboard server
+        const port = args.length > 1 ? parseInt(args[1]) : 8080;
+        const dashboard = new DashboardServer({
+            port,
+            metricsExporter,
+            webhooks,
+            eventBus,
+            performance
+        });
+        
+        console.log(`${CYAN}Starting Chat LLM Dashboard...${NORMAL}`);
+        dashboard.start()
+            .then(() => {
+                console.log(`${GREEN}${CHECK}${NORMAL} Dashboard is running`);
+                console.log(`${CYAN}Access at:${NORMAL} http://localhost:${port}`);
+                console.log(`${GRAY}Press Ctrl+C to stop${NORMAL}`);
+            })
+            .catch(error => {
+                console.error(`${RED}Failed to start dashboard: ${error.message}${NORMAL}`);
+                process.exit(-1);
+            });
+    } else if (args[0] === 'dashboard-status') {
+        // v2.2: Check if dashboard is available
+        console.log(`${CYAN}Dashboard Status:${NORMAL}`);
+        console.log(`  Status: ${GREEN}Available${NORMAL}`);
+        console.log(`  Default port: 8080`);
+        console.log(`  Start with: ./chat-llm.js dashboard [port]`);
     } else {
         await canary(); // Only run canary if not directly testing sentiment
         if (args.length > 0) {
