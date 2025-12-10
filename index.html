@@ -73,18 +73,36 @@
             }
 
             const THINK_REGEX = /<think>(.*?)(<\/think>|$)/gs;
+            const TOOL_CODE_REGEX = /<tool_code>(.*?)<\/tool_code>/gs;
+            const TOOL_OUTPUT_PREFIX = 'Tool output:\n';
 
             function unthink(input) {
                 const thoughts = [];
+                const toolOutputs = [];
 
-                const extract = (match, content) => {
-                    thoughts.push(content.trim());
+                let processedInput = input;
+
+                // Extract tool outputs first, as they are added by the system after tool execution
+                if (processedInput.includes(TOOL_OUTPUT_PREFIX)) {
+                    const parts = processedInput.split(TOOL_OUTPUT_PREFIX);
+                    processedInput = parts[0]; // The part before the tool output
+                    toolOutputs.push(parts.slice(1).join(TOOL_OUTPUT_PREFIX).trim()); // The tool output itself
+                }
+
+                const extractThoughts = (match, content) => {
+                    // Remove tool_code from thoughts
+                    const thoughtContent = content.replace(TOOL_CODE_REGEX, '').trim();
+                    if (thoughtContent.length > 0) {
+                        thoughts.push(thoughtContent);
+                    }
                     return '';
                 }
 
-                const answer = input.replace(THINK_REGEX, extract).trim();
+                const answer = processedInput.replace(THINK_REGEX, extractThoughts).trim();
                 const thought = thoughts.join(' ');
-                return { thought, answer };
+                const toolOutput = toolOutputs.join('\n');
+
+                return { thought, answer, toolOutput };
             }
 
             async function ask(question, handler) {
@@ -111,7 +129,17 @@
                             }
                             const text = new TextDecoder().decode(value, { stream: true });
                             reply += text;
-                            const { thought, answer } = unthink(reply.trim());
+                            const { thought, answer, toolOutput } = unthink(reply.trim());
+
+                            if (toolOutput?.length > 0) {
+                                if (!document.querySelector('.speech-bubble-tool-output')) {
+                                    unmessage('loader');
+                                    message('tool-output', toolOutput);
+                                } else {
+                                    stream('tool-output', toolOutput);
+                                }
+                            }
+
                             if (thought?.length > 0) {
                                 if (!thinking && !answering) {
                                     thinking = true;
@@ -284,7 +312,8 @@
         .speech-bubble-thought,
         .speech-bubble-assistant,
         .speech-bubble-human,
-        .speech-bubble-panic {
+        .speech-bubble-panic,
+        .speech-bubble-tool-output {
             display: block;
             white-space: pre-line;
             position: relative;
@@ -318,6 +347,13 @@
         .color-panic {
             background-color: #9B239D;
             color: #ddd;
+        }
+
+        .color-tool-output {
+            background-color: #333;
+            color: #eee;
+            font-family: monospace;
+            font-size: 0.85em;
         }
 
         div#input {
