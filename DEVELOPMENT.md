@@ -160,6 +160,22 @@ Complete multi-purpose agent orchestration system for delegating tasks to specia
 ./chat-llm.js agent-stats             # Performance metrics
 ```
 
+---
+
+## Forward-Looking Enhancements
+
+The current release is production-ready, but the modular architecture makes it easy to extend. Below are concrete ideas that keep coming up during design reviews and customer conversations:
+
+1. **Multilingual Demo Harness** – Extend `demoReply` so the offline regression suite can validate Spanish, German, French, Italian, and Indonesian prompts without real API calls. This unlocks deterministic CI runs even in restricted environments.
+2. **Workflow CLI Surface** – Expose the `WorkflowManager` through commands such as `workflow-list`, `workflow-run <id>`, and `workflow-history <id>` so advanced users can orchestrate multi-stage tasks without editing code.
+3. **Adaptive Memory Summaries** – Introduce automatic, model-assisted summarization when a conversation crosses a configurable token threshold (e.g., via a background summarizer agent). This keeps the memory store compact while retaining semantic breadcrumbs.
+4. **Context Snapshots & Sharing** – Allow exporting/importing contexts (with documents + metadata) through a single CLI command for easier collaboration across teams or environments.
+5. **Plugin Marketplace** – Package the `PluginManager` lifecycle into a `plugins/` directory with manifest files (`plugin.json`) so community members can drop in new integrations (e.g., Jira ticket fetcher, Git diff explainer) without touching core.
+6. **Observability Hooks** – Route `eventBus` notifications into optional webhooks or OpenTelemetry exporters so operators can monitor usage trends, failures, and cache hit rates in real time.
+7. **Task Scheduler** – Layer a lightweight cron-style scheduler on top of `TaskManager` for recurring jobs (daily status summaries, hourly context sync, etc.).
+
+These candidates are intentionally incremental—each can ship independently while continuing to reinforce the “robust Swiss Army Knife” positioning of Chat LLM v2.
+
 #### 2. **Context Manager** (`tools/context-manager.js`)
 Sophisticated data and knowledge management system for working with custom datasets.
 
@@ -562,4 +578,3 @@ git status --porcelain
 ✅ Documentation updated
 ✅ Uncommitted changes detection added to CI/CD workflows
 ✅ Ready for production use or further development
-

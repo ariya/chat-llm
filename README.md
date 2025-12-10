@@ -1,10 +1,12 @@
 # Chat LLM
 
-**Chat LLM** is a Swiss Army Knife for LLM-powered tasks. It's a simple, zero-dependency tool to chat with an LLM (large language model) that provides advanced features like agent orchestration, context management, memory systems, and task automation.
+**Chat LLM** is a Swiss Army Knife for LLM-powered tasks. It's a simple, zero-dependency tool to chat with an LLM (large language model) that provides advanced features like agent orchestration, context management, memory systems, task automation, and enterprise-grade monitoring.
 
 It works seamlessly with both cloud-based LLM services (e.g., [OpenAI GPT](https://platform.openai.com/docs), [Groq](https://groq.com), [OpenRouter](https://openrouter.ai)) and locally hosted LLMs (e.g. [llama.cpp](https://github.com/ggerganov/llama.cpp), [LM Studio](https://lmstudio.ai), [Ollama](https://ollama.com)).
 
 Chat LLM is accessible via the terminal or through its minimalist web interface.
+
+**Current Version**: 2.2.0 (Development)
 
 <img src="chat-llm.png" alt="Chat LLM" width="50%" height="50%"/>
 
@@ -96,7 +98,52 @@ Built-in sentiment analysis, request logging, and statistics:
 ./chat-llm.js export json       # Export logs
 ```
 
+## v2.2 Features - Monitoring & Integration (Development)
+
+Chat LLM v2.2 introduces enterprise-grade monitoring, webhooks, and observability:
+
+### Metrics Export & Monitoring
+Export system metrics in Prometheus or JSON format for monitoring dashboards:
+
+```bash
+./chat-llm.js metrics-summary              # Quick metrics overview
+./chat-llm.js metrics-export prometheus    # Prometheus format
+./chat-llm.js metrics-export json          # JSON format
+```
+
+Metrics include:
+- System uptime and performance
+- Request/response statistics
+- Cache hit/miss ratios
+- Agent usage patterns
+- Memory and resource utilization
+
+### Webhook Integration
+Trigger HTTP webhooks for events and integrate with external systems:
+
+```bash
+./chat-llm.js webhook-list                        # List webhooks
+./chat-llm.js webhook-register event url          # Register webhook
+./chat-llm.js webhook-stats                       # Delivery statistics
+```
+
+Features:
+- Event-based webhooks with pattern matching
+- Retry logic with exponential backoff
+- HMAC signatures for security
+- Delivery tracking and logs
+
+### Enhanced Testing
+Comprehensive test suites for quality assurance:
+
+```bash
+node tests/e2e-tests.js         # End-to-end tests
+node tests/test-suite.js        # Unit tests
+```
+
 For detailed v2 features and examples, see [QUICK_START.md](QUICK_START.md) and [DEVELOPMENT.md](DEVELOPMENT.md).
+
+For v2.2 development roadmap, see [V2_2_DEVELOPMENT_PLAN.md](V2_2_DEVELOPMENT_PLAN.md).
 
 ## Response Caching & Configuration
 
